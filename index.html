@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -1219,7 +1219,6 @@ function renderPanel(mi,sem,modNombre,color){
   if(gen>0)html+='<div style="background:var(--grl);border:1px solid #9FE1CB;border-radius:8px;padding:.5rem .85rem;font-size:12px;color:#085041;margin-bottom:.75rem;display:flex;align-items:center;gap:6px;"><i class="ti ti-check"></i> '+gen+'/'+recursosActivos.length+' comentarios — '+ap+' aprobados.</div>';
   html+='<div class="rlist">';
   for(var ri=0;ri<recursosActivos.length;ri++){
-  for(var ri=0;ri<recursosActivos.length;ri++){
     var r=recursosActivos[ri];var ky=rk(car,cic,mi,sem,r.id);var rv2=ST.rev[ky]||{};var recOpen=ST.orecs[ky];var hasImg=!!(ST.imgs[ky]);var hasPdf=!!(ST.pdfs[ky]);var hasLink=!!(ST.links[ky]);
     var refId=r.tipo==="Infograf"+String.fromCharCode(237)+"a"?"imagen":r.tipo==="PDF"?"pdf":"video";var rc=(REFS[refId]||[]).length;
     var esVideoInter=r.tipo==="Video / Interactivo";
@@ -1257,6 +1256,7 @@ function renderPanel(mi,sem,modNombre,color){
     html+='<div class="clbl"><i class="ti ti-message" style="font-size:12px"></i> Comentario para checklist eTiza</div>';
     html+='<textarea class="carea" id="txt-'+ky+'" onchange="saveC(\''+ky+'\',this.value)">'+(rv2.comentario||"")+'</textarea>';
     html+='</div></div>';
+  }
   html+='</div><div class="pacts">';
   html+='<button class="bsec" onclick="exportarExcel()"><i class="ti ti-download"></i> Exportar Excel</button>';
   html+='<button class="bpri" onclick="guardar('+mi+','+sem+')"><i class="ti ti-device-floppy"></i> Guardar semana</button>';
