@@ -1,1 +1,1 @@
-# qa-revisor
+# qa-re.visor
