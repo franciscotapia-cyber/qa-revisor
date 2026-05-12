@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -691,7 +691,7 @@ function renderDashboard(){
     html+='<select class="dash-filter-sel" onchange="setDashFilter(\'modulos\',\'carrera\',this.value)"><option value="">Todas las carreras</option>';
     CARRERAS.forEach(function(c2){html+='<option value="'+c2.id+'"'+(fm.carrera===c2.id?' selected':'')+'>'+c2.short+'</option>';});
     html+='</select>';
-    html+='<select class="dash-filter-sel" onchange="setDashFilter(\'modulos\',\'tipo\',this.value)"><option value="">Todos los tipos</option><option value="T'+String.fromCharCode(233)+'cnico"'+(fm.tipo==="T'+String.fromCharCode(233)+'cnico"?' selected':'')+'>T'+String.fromCharCode(233)+'cnico</option><option value="Transversal"'+(fm.tipo==="Transversal"?' selected':'')+'>Transversal</option><option value="B'+String.fromCharCode(225)+'sico"'+(fm.tipo==="B'+String.fromCharCode(225)+'sico"?' selected':'')+'>B'+String.fromCharCode(225)+'sico</option></select>';
+    html+='<select class="dash-filter-sel" onchange="setDashFilter(\'modulos\',\'tipo\',this.value)"><option value="">Todos los tipos</option><option value="T\u00e9cnico"'+(fm.tipo==="T\u00e9cnico"?' selected':'')+'>T\u00e9cnico</option><option value="Transversal"'+(fm.tipo==="Transversal"?' selected':'')+'>Transversal</option><option value="B\u00e1sico"'+(fm.tipo==="B\u00e1sico"?' selected':'')+'>B\u00e1sico</option></select>';
     html+='<select class="dash-filter-sel" onchange="setDashFilter(\'modulos\',\'estado\',this.value)"><option value="">Todos los estados</option><option value="sin"'+(fm.estado==="sin"?' selected':'')+'>Sin iniciar</option><option value="prog"'+(fm.estado==="prog"?' selected':'')+'>En progreso</option><option value="comp"'+(fm.estado==="comp"?' selected':'')+'>Completo</option></select>';
     if(hasF2)html+='<button class="dash-clear-btn" onclick="clearDashFilters(\'modulos\')"><i class="ti ti-x" style="font-size:11px"></i> Limpiar</button>';
     html+='</div>';
@@ -1522,4 +1522,5 @@ window.setDashView=setDashView;window.irA=irA;window.setCarDetail=setCarDetail;w
 </script>
 </body>
 </html>
+
 
