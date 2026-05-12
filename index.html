@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA Revisor — CFT San Agustín</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+:root{--bg:#F7F6F3;--sur:#fff;--sur2:#F0EEE9;--bor:rgba(0,0,0,.08);--bors:rgba(0,0,0,.15);--t:#1A1917;--t2:#6B6760;--t3:#9E9B96;--pu:#534AB7;--pul:#EEEDFE;--pum:#7F77DD;--gr:#1D9E75;--grl:#E1F5EE;--am:#BA7517;--aml:#FAEEDA;--bl:#185FA5;--bll:#E6F1FB;--re:#A32D2D;--rel:#FCEBEB;--grl2:#F1EFE8;--r:10px;--rl:14px;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);font-size:14px;line-height:1.5;min-height:100vh;}
+#setup{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;}
+.sc{background:var(--sur);border-radius:var(--rl);border:1px solid var(--bor);padding:2.5rem;max-width:460px;width:100%;box-shadow:0 2px 8px rgba(0,0,0,.06);}
+.slogo{display:flex;align-items:center;gap:10px;margin-bottom:2rem;}
+.slogo-i{width:42px;height:42px;background:var(--pu);border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:21px;}
+.slogo-t{font-size:15px;font-weight:600;}
+.slogo-t span{display:block;font-size:12px;font-weight:400;color:var(--t2);}
+.stitle{font-size:20px;font-weight:600;margin-bottom:6px;}
+.ssub{font-size:13px;color:var(--t2);margin-bottom:1.5rem;line-height:1.6;}
+.slbl{font-size:12px;font-weight:500;color:var(--t2);margin-bottom:6px;}
+.srow{display:flex;gap:8px;margin-bottom:1rem;}
+.sinput{flex:1;border:1px solid var(--bors);border-radius:var(--r);padding:10px 12px;font-family:'DM Mono',monospace;font-size:13px;background:var(--bg);color:var(--t);outline:none;}
+.sinput:focus{border-color:var(--pum);}
+.tbtn{padding:10px 14px;border:1px solid var(--bors);border-radius:var(--r);background:var(--sur2);color:var(--t2);font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif;white-space:nowrap;}
+.tbtn:hover{background:var(--pul);color:var(--pu);}
+.sbtn{width:100%;background:var(--pu);color:#fff;border:none;border-radius:var(--r);padding:11px;font-size:14px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.sbtn:hover{background:#3C3489;}
+.sbtn:disabled{opacity:.5;cursor:not-allowed;}
+.tres{border-radius:8px;padding:.65rem .85rem;font-size:12.5px;margin-bottom:.75rem;display:none;align-items:center;gap:8px;}
+.tres.show{display:flex;}
+.tres.ok{background:var(--grl);color:#085041;border:1px solid #9FE1CB;}
+.tres.err{background:var(--rel);color:var(--re);border:1px solid #F09595;}
+.tres.chk{background:var(--pul);color:var(--pu);border:1px solid var(--pum);}
+.snote{margin-top:1rem;font-size:11px;color:var(--t3);text-align:center;line-height:1.7;}
+.snote a{color:var(--pu);text-decoration:none;}
+.spin{animation:sp 1s linear infinite;display:inline-block;}
+@keyframes sp{to{transform:rotate(360deg)}}
+#app{display:none;height:100vh;overflow:hidden;}
+.layout{display:grid;grid-template-columns:220px 1fr;height:100vh;}
+.sidebar{background:var(--sur);border-right:1px solid var(--bor);display:flex;flex-direction:column;overflow:hidden;}
+.sh{padding:1rem;border-bottom:1px solid var(--bor);flex-shrink:0;}
+.brand{display:flex;align-items:center;gap:8px;}
+.bi{width:28px;height:28px;background:var(--pu);border-radius:7px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;flex-shrink:0;}
+.bn{font-size:13px;font-weight:600;line-height:1.2;}
+.bn span{display:block;font-size:11px;font-weight:400;color:var(--t2);}
+.snav{flex:1;overflow-y:auto;padding:.75rem;}
+.nlbl{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.06em;padding:0 .25rem;margin:.75rem 0 .3rem;}
+.nlbl:first-child{margin-top:0;}
+.ntab{width:100%;text-align:left;padding:7px 10px;border-radius:7px;border:none;background:transparent;cursor:pointer;font-size:12.5px;font-family:'DM Sans',sans-serif;color:var(--t2);display:flex;align-items:center;gap:7px;margin-bottom:2px;font-weight:500;}
+.ntab:hover{background:var(--sur2);color:var(--t);}
+.ntab.active{background:var(--pul);color:var(--pu);}
+.ntab.tab-ref.active{background:#FAEEDA;color:#633806;}
+.ntab.tab-dash.active{background:#E6F1FB;color:#0C447C;}
+
+/* ── DASHBOARD ── */
+.dash-view-tabs{display:flex;gap:8px;margin-bottom:1.25rem;}
+.dash-vtab{padding:6px 16px;border-radius:8px;border:1px solid var(--bors);background:transparent;cursor:pointer;font-size:13px;font-weight:500;color:var(--t2);font-family:'DM Sans',sans-serif;transition:all .12s;}
+.dash-vtab:hover{background:var(--sur2);}
+.dash-vtab.active{background:var(--bl);color:#fff;border-color:var(--bl);}
+.dash-kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.5rem;}
+.dash-kpi{background:var(--sur);border:1px solid var(--bor);border-radius:var(--rl);padding:1rem 1.1rem;position:relative;overflow:hidden;}
+.dash-kpi-icon{position:absolute;right:12px;top:12px;font-size:22px;opacity:.12;}
+.dash-kpi-label{font-size:11px;font-weight:500;color:var(--t2);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em;}
+.dash-kpi-val{font-size:28px;font-weight:600;line-height:1;margin-bottom:4px;}
+.dash-kpi-sub{font-size:11px;color:var(--t3);}
+.dash-kpi-bar{height:3px;border-radius:99px;background:var(--sur2);margin-top:8px;overflow:hidden;}
+.dash-kpi-bar-fill{height:100%;border-radius:99px;transition:width .4s;}
+.dash-section{font-size:13px;font-weight:600;color:var(--t2);margin:1.25rem 0 .75rem;display:flex;align-items:center;gap:7px;}
+.dash-car-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:1.5rem;}
+.dash-car-card{background:var(--sur);border:1px solid var(--bor);border-radius:var(--rl);overflow:hidden;}
+.dash-car-header{padding:.85rem 1rem;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bor);}
+.dash-car-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.dash-car-name{font-size:13px;font-weight:600;flex:1;}
+.dash-car-pct{font-size:20px;font-weight:600;}
+.dash-car-body{padding:.85rem 1rem;}
+.dash-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.dash-bar-lbl{font-size:11px;color:var(--t2);width:80px;flex-shrink:0;}
+.dash-bar-track{flex:1;height:7px;border-radius:99px;background:var(--sur2);overflow:hidden;}
+.dash-bar-fill{height:100%;border-radius:99px;}
+.dash-bar-num{font-size:11px;font-weight:500;color:var(--t2);width:30px;text-align:right;flex-shrink:0;}
+.dash-ciclo-table{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:1.5rem;}
+.dash-ciclo-table th{text-align:left;padding:6px 10px;font-size:11px;font-weight:600;color:var(--t2);border-bottom:1px solid var(--bor);background:var(--sur2);}
+.dash-ciclo-table td{padding:7px 10px;border-bottom:0.5px solid var(--bor);vertical-align:middle;}
+.dash-ciclo-table tr:last-child td{border-bottom:none;}
+.dash-ciclo-table tr:hover td{background:var(--sur2);}
+.dash-status-pill{font-size:10px;padding:2px 8px;border-radius:99px;font-weight:500;white-space:nowrap;display:inline-block;}
+.dsp-v{background:var(--grl);color:#085041;}
+.dsp-c{background:var(--aml);color:#633806;}
+.dsp-r{background:var(--rel);color:var(--re);}
+.dsp-p{background:var(--grl2);color:#444441;}
+.dash-mini-bar{display:flex;height:8px;border-radius:99px;overflow:hidden;gap:1px;min-width:80px;}
+.dash-mini-seg{height:100%;}
+.dash-alert-box{background:var(--aml);border:1px solid #EF9F27;border-radius:10px;padding:.85rem 1rem;margin-bottom:1.25rem;display:flex;align-items:flex-start;gap:10px;}
+.dash-alert-title{font-size:13px;font-weight:600;color:#633806;margin-bottom:4px;}
+.dash-alert-list{font-size:12px;color:#854F0B;line-height:1.7;}
+.dash-tiempo{background:var(--bll);border:1px solid #85B7EB;border-radius:10px;padding:.85rem 1rem;margin-bottom:1.25rem;display:flex;align-items:center;gap:12px;}
+.dash-tiempo-icon{font-size:24px;color:var(--bl);flex-shrink:0;}
+.dash-tiempo-title{font-size:13px;font-weight:600;color:#0C447C;}
+.dash-tiempo-sub{font-size:12px;color:var(--bl);}
+.dash-go-btn{font-size:11px;padding:3px 10px;border-radius:99px;border:1px solid var(--bors);background:transparent;cursor:pointer;color:var(--t2);font-family:'DM Sans',sans-serif;margin-left:auto;white-space:nowrap;}
+.dash-go-btn:hover{background:var(--sur2);}
+.ncar{width:100%;text-align:left;padding:6px 8px;border-radius:7px;border:none;background:transparent;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--t2);display:flex;align-items:center;gap:7px;margin-bottom:1px;}
+.ncar:hover{background:var(--sur2);color:var(--t);}
+.ncar.active{background:var(--pul);color:var(--pu);font-weight:500;}
+.ndot{width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.cg{padding-left:14px;margin-bottom:2px;}
+.ncic{width:100%;text-align:left;padding:4px 8px;border-radius:6px;border:none;background:transparent;cursor:pointer;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--t3);margin-bottom:1px;}
+.ncic:hover{background:var(--sur2);color:var(--t2);}
+.ncic.active{background:var(--bll);color:var(--bl);font-weight:500;}
+.sf{padding:.75rem 1rem;border-top:1px solid var(--bor);font-size:11px;color:var(--t3);display:flex;align-items:center;gap:6px;flex-shrink:0;cursor:pointer;}
+.sf:hover{background:var(--sur2);}
+.adot{width:6px;height:6px;border-radius:50%;background:var(--gr);flex-shrink:0;}
+.ma{display:flex;flex-direction:column;overflow:hidden;}
+.topbar{background:var(--sur);border-bottom:1px solid var(--bor);padding:.75rem 1.25rem;display:flex;align-items:center;gap:12px;flex-shrink:0;}
+.tbtitle{font-size:14px;font-weight:600;flex:1;}
+.chips{display:flex;gap:6px;flex-wrap:wrap;}
+.chip{font-size:11px;padding:3px 10px;border-radius:99px;font-weight:500;}
+.cg2{background:var(--grl);color:#085041;}.ca{background:var(--aml);color:#633806;}.cb{background:var(--bll);color:var(--bl);}.cgr{background:var(--grl2);color:#444441;}
+.content{flex:1;overflow-y:auto;padding:1.25rem;}
+.empty{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--t3);text-align:center;gap:10px;}
+.eicon{width:56px;height:56px;background:var(--pul);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--pu);margin-bottom:4px;}
+.empty h2{font-size:15px;font-weight:500;color:var(--t2);}
+.empty p{font-size:12px;color:var(--t3);max-width:280px;line-height:1.6;}
+.mc{background:var(--sur);border:1px solid var(--bor);border-radius:var(--rl);margin-bottom:.75rem;overflow:hidden;}
+.mh{padding:.9rem 1rem;display:flex;align-items:center;gap:10px;cursor:pointer;}
+.mh:hover{background:var(--sur2);}
+.mi{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.mn{font-size:13.5px;font-weight:500;flex:1;}
+.sbg{font-size:11px;padding:2px 9px;border-radius:99px;font-weight:500;white-space:nowrap;}
+.sv{background:var(--grl);color:#085041;}.sm{background:var(--aml);color:#633806;}.sr{background:var(--bll);color:var(--bl);}.sp2{background:var(--grl2);color:#5F5E5A;}
+.chv{font-size:14px;color:var(--t3);transition:transform .2s;}
+.chv.open{transform:rotate(180deg);}
+.ss{border-top:1px solid var(--bor);padding:.75rem 1rem;}
+.slbl2{font-size:11px;color:var(--t3);margin-bottom:8px;font-weight:500;}
+.sgrid{display:grid;grid-template-columns:repeat(8,1fr);gap:5px;}
+.sbtn2{border:1px solid var(--bors);border-radius:7px;padding:6px 3px;text-align:center;cursor:pointer;background:var(--bg);font-size:11px;font-weight:500;color:var(--t2);font-family:'DM Sans',sans-serif;}
+.sbtn2:hover{border-color:var(--pum);color:var(--pu);background:var(--pul);}
+.sbtn2.sel{border-color:var(--bl);background:var(--bll);color:var(--bl);}
+.sbtn2.ok{background:var(--grl);border-color:#5DCAA5;color:#085041;}
+.sbtn2.warn{background:var(--aml);border-color:#EF9F27;color:#633806;}
+.sbtn2.err{background:var(--rel);border-color:#F09595;color:var(--re);}
+.rp{border-top:1px solid var(--bor);padding:1rem;}
+.ph{display:flex;align-items:center;gap:10px;margin-bottom:.85rem;flex-wrap:wrap;}
+.ptitle{font-size:13px;font-weight:600;flex:1;}
+.biaall{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:8px;border:none;background:var(--pu);color:#fff;font-size:12.5px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;position:relative;overflow:hidden;}
+.biaall:hover{background:#3C3489;}
+.biaall:disabled{opacity:.6;cursor:not-allowed;}
+.iapb{position:absolute;bottom:0;left:0;height:2px;background:rgba(255,255,255,.5);width:0%;transition:width .3s;}
+.tpill{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:99px;background:var(--grl);color:#085041;border:1px solid #9FE1CB;margin-bottom:.75rem;}
+.refpill{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:99px;background:#FAEEDA;color:#633806;border:1px solid #EF9F27;margin-bottom:.75rem;margin-left:6px;}
+.kitpill{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:99px;background:var(--grl);color:#085041;border:1px solid #5DCAA5;margin-bottom:.75rem;margin-left:6px;}
+.rlist{display:flex;flex-direction:column;gap:8px;}
+.ri{border:1px solid var(--bor);border-radius:var(--r);background:var(--sur);overflow:hidden;}
+.rtop{padding:.75rem .85rem;display:flex;align-items:center;gap:8px;cursor:pointer;}
+.rtop:hover{background:var(--sur2);}
+.ttag{font-size:10.5px;padding:2px 7px;border-radius:99px;white-space:nowrap;font-weight:500;}
+.ti2{background:var(--bll);color:var(--bl);}.tp{background:var(--grl);color:#27500A;}.tv{background:var(--aml);color:#633806;}.tc{background:#FBEAF0;color:#72243E;}.tf{background:var(--grl2);color:#444441;}
+.rname{font-size:13px;font-weight:500;flex:1;}
+.spill{font-size:10px;padding:2px 7px;border-radius:99px;white-space:nowrap;}
+.sok{background:var(--grl);color:#085041;border:1px solid #9FE1CB;}
+.sno{background:var(--grl2);color:var(--t3);}
+.ebs{display:flex;gap:3px;}
+.eb{font-size:11px;padding:3px 8px;border-radius:99px;border:1px solid var(--bors);background:transparent;cursor:pointer;color:var(--t2);font-family:'DM Sans',sans-serif;}
+.eb:hover{background:var(--sur2);}
+.eb.ok{background:var(--grl);color:#085041;border-color:#5DCAA5;}
+.eb.warn{background:var(--aml);color:#854F0B;border-color:#EF9F27;}
+.eb.err{background:var(--rel);color:var(--re);border-color:#F09595;}
+.xb{width:22px;height:22px;border-radius:6px;border:1px solid var(--bors);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--t3);flex-shrink:0;}
+.xb:hover{background:var(--sur2);}
+.rbody{padding:.85rem;border-top:1px solid var(--bor);display:none;background:var(--bg);}
+.rbody.open{display:block;}
+.uzone{border:2px dashed var(--bors);border-radius:8px;padding:1.25rem;text-align:center;cursor:pointer;background:var(--sur);position:relative;}
+.uzone:hover{border-color:var(--pum);background:var(--pul);}
+.uzone.has{border-style:solid;border-color:#5DCAA5;background:var(--grl);}
+.uzone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.uthumb{max-width:100%;max-height:160px;border-radius:6px;margin-top:8px;border:1px solid var(--bor);}
+.clrbtn{font-size:11px;color:var(--re);background:none;border:none;cursor:pointer;margin-top:5px;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:3px;}
+.genbtn{width:100%;margin-top:.85rem;display:flex;align-items:center;justify-content:center;gap:7px;padding:10px;border-radius:8px;border:none;background:var(--pu);color:#fff;font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.genbtn:hover{background:#3C3489;}
+.genbtn:disabled{opacity:.55;cursor:not-allowed;}
+.sbox{border-radius:8px;padding:.65rem .85rem;font-size:12.5px;margin-top:8px;display:none;align-items:center;gap:8px;line-height:1.5;}
+.sbox.show{display:flex;}
+.sbox.wk{background:var(--pul);color:var(--pu);border:1px solid var(--pum);}
+.sbox.gd{background:var(--grl);color:#085041;border:1px solid #9FE1CB;}
+.sbox.bd{background:var(--rel);color:var(--re);border:1px solid #F09595;}
+.clbl{font-size:11px;font-weight:500;color:var(--t2);margin-top:.85rem;margin-bottom:4px;display:flex;align-items:center;gap:4px;}
+.carea{width:100%;font-size:12.5px;line-height:1.6;border:1px solid var(--bors);border-radius:7px;padding:7px 9px;background:var(--sur);color:var(--t);font-family:'DM Mono',monospace;resize:vertical;min-height:72px;outline:none;}
+.carea:focus{border-color:var(--pum);}
+.pacts{display:flex;gap:8px;justify-content:flex-end;margin-top:1rem;padding-top:.85rem;border-top:1px solid var(--bor);}
+.bsec{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:8px;border:1px solid var(--bors);background:transparent;color:var(--t);font-size:12.5px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.bsec:hover{background:var(--sur2);}
+.bpri{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:8px;border:none;background:var(--gr);color:#fff;font-size:12.5px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;}
+.bpri:hover{background:#0F6E56;}
+
+/* ── REFERENCIAS ── */
+.page-title{font-size:18px;font-weight:600;margin-bottom:6px;}
+.page-sub{font-size:13px;color:var(--t2);line-height:1.6;margin-bottom:1.25rem;}
+.ref-banner{background:var(--aml);border:1px solid #EF9F27;border-radius:10px;padding:1rem 1.25rem;display:flex;align-items:flex-start;gap:12px;margin-bottom:1.5rem;}
+.ref-banner-icon{font-size:20px;color:#854F0B;flex-shrink:0;margin-top:2px;}
+.ref-banner-title{font-size:13px;font-weight:600;color:#633806;margin-bottom:4px;}
+.ref-banner-text{font-size:12px;color:#854F0B;line-height:1.6;}
+.ref-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:2rem;}
+.ref-card{background:var(--sur);border:1px solid var(--bor);border-radius:var(--rl);overflow:hidden;}
+.ref-ch{padding:.85rem 1rem;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--bor);}
+.ref-ci{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.ref-ct{font-size:13px;font-weight:600;flex:1;}
+.ref-cb{padding:1rem;}
+.ref-desc{font-size:11px;color:var(--t3);margin-bottom:.75rem;line-height:1.5;}
+.ref-uzone{border:2px dashed var(--bors);border-radius:8px;padding:1rem;text-align:center;cursor:pointer;background:var(--bg);position:relative;margin-bottom:.75rem;}
+.ref-uzone:hover{border-color:var(--pum);background:var(--pul);}
+.ref-uzone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.ref-items{display:flex;flex-direction:column;gap:6px;}
+.ref-item{background:var(--sur2);border-radius:7px;padding:.6rem .75rem;display:flex;align-items:flex-start;gap:8px;}
+.ref-ithumb{width:36px;height:36px;border-radius:5px;object-fit:cover;border:1px solid var(--bor);flex-shrink:0;}
+.ref-iicon{width:36px;height:36px;border-radius:5px;background:var(--rel);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--re);flex-shrink:0;}
+.ref-iname{font-size:12px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.ref-isub{font-size:10px;color:var(--t3);}
+.ref-del{width:22px;height:22px;border-radius:5px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--t3);flex-shrink:0;margin-top:2px;}
+.ref-del:hover{background:var(--rel);color:var(--re);}
+.ref-da{width:100%;font-size:12px;border:1px solid var(--bors);border-radius:7px;padding:6px 8px;background:var(--bg);color:var(--t);font-family:'DM Sans',sans-serif;resize:vertical;min-height:52px;outline:none;margin-top:5px;}
+.ref-da:focus{border-color:var(--pum);}
+.ref-dlbl{font-size:11px;font-weight:500;color:var(--t2);margin-top:4px;}
+
+/* ── KIT DE MARCA ── */
+.kit-tabs{display:flex;gap:6px;margin-bottom:1.25rem;flex-wrap:wrap;}
+.kit-tab{padding:6px 14px;border-radius:8px;border:1px solid var(--bors);background:transparent;cursor:pointer;font-size:12.5px;font-weight:500;color:var(--t2);font-family:'DM Sans',sans-serif;}
+.kit-tab:hover{background:var(--sur2);}
+.kit-tab.active{background:var(--grl);color:#085041;border-color:#5DCAA5;}
+.kit-section{display:none;}
+.kit-section.active{display:block;}
+.kit-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:1.25rem;}
+.kit-card{background:var(--sur);border:1px solid var(--bor);border-radius:var(--rl);overflow:hidden;}
+.kit-ch{padding:.85rem 1rem;border-bottom:1px solid var(--bor);display:flex;align-items:center;gap:8px;}
+.kit-ci{width:30px;height:30px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.kit-ct{font-size:13px;font-weight:600;flex:1;}
+.kit-cb{padding:1rem;}
+.kit-field{margin-bottom:.85rem;}
+.kit-flbl{font-size:11px;font-weight:500;color:var(--t2);margin-bottom:5px;}
+.kit-finput{width:100%;border:1px solid var(--bors);border-radius:7px;padding:7px 9px;font-size:12.5px;background:var(--bg);color:var(--t);font-family:'DM Sans',sans-serif;outline:none;}
+.kit-finput:focus{border-color:var(--pum);}
+.kit-ftarea{width:100%;border:1px solid var(--bors);border-radius:7px;padding:7px 9px;font-size:12.5px;background:var(--bg);color:var(--t);font-family:'DM Sans',sans-serif;outline:none;resize:vertical;min-height:68px;}
+.kit-ftarea:focus{border-color:var(--pum);}
+.color-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
+.color-chip{width:28px;height:28px;border-radius:6px;border:1px solid var(--bors);cursor:pointer;position:relative;}
+.color-chip input[type=color]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.color-add{width:28px;height:28px;border-radius:6px;border:1.5px dashed var(--bors);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--t3);}
+.color-add:hover{border-color:var(--pum);color:var(--pu);}
+.color-list{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
+.color-item{display:flex;align-items:center;gap:4px;background:var(--sur2);border-radius:6px;padding:3px 7px;font-size:11px;}
+.color-swatch{width:14px;height:14px;border-radius:3px;flex-shrink:0;}
+.color-del{background:none;border:none;cursor:pointer;color:var(--t3);font-size:11px;padding:0;}
+.color-del:hover{color:var(--re);}
+.kit-img-zone{border:2px dashed var(--bors);border-radius:8px;padding:.85rem;text-align:center;cursor:pointer;background:var(--bg);position:relative;margin-top:4px;}
+.kit-img-zone:hover{border-color:var(--pum);background:var(--pul);}
+.kit-img-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;}
+.kit-img-thumb{max-width:100%;max-height:120px;border-radius:6px;margin-top:6px;border:1px solid var(--bor);}
+.kit-img-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px;}
+.kit-img-item{position:relative;border-radius:6px;overflow:hidden;border:1px solid var(--bor);}
+.kit-img-item img{width:100%;height:60px;object-fit:cover;display:block;}
+.kit-img-del{position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:4px;background:rgba(0,0,0,.5);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;}
+.kit-save-btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;border:none;background:var(--gr);color:#fff;font-size:12.5px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif;margin-top:.5rem;}
+.kit-save-btn:hover{background:#0F6E56;}
+.kit-status{font-size:12px;color:#085041;margin-left:8px;display:none;}
+
+.toast{position:fixed;bottom:20px;right:20px;background:#1A1917;color:#F7F6F3;font-size:13px;padding:10px 16px;border-radius:9px;display:none;z-index:1000;box-shadow:0 4px 14px rgba(0,0,0,.25);max-width:320px;}
+
+/* ── MOODLE PANELS ── */
+.moodle-panel{margin-top:.75rem;border:1px solid var(--bor);border-radius:var(--r);overflow:hidden;}
+.moodle-tabs{display:flex;border-bottom:1px solid var(--bor);}
+.mtab{flex:1;padding:7px 10px;font-size:12px;font-weight:500;text-align:center;cursor:pointer;background:var(--sur2);border:none;color:var(--t2);font-family:'DM Sans',sans-serif;border-right:1px solid var(--bor);}
+.mtab:last-child{border-right:none;}
+.mtab:hover{background:var(--sur);color:var(--t);}
+.mtab.active{background:var(--sur);color:var(--pu);border-bottom:2px solid var(--pu);}
+.mtab-content{padding:.85rem;display:none;background:var(--sur);}
+.mtab-content.active{display:block;}
+.moodle-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:.75rem;}
+.moodle-field{display:flex;flex-direction:column;gap:4px;}
+.mfield-label{font-size:11px;font-weight:500;color:var(--t2);}
+.mfield-input{border:1px solid var(--bors);border-radius:6px;padding:6px 9px;font-size:12.5px;background:var(--bg);color:var(--t);font-family:'DM Sans',sans-serif;outline:none;}
+.mfield-input:focus{border-color:var(--pum);}
+.mfield-select{border:1px solid var(--bors);border-radius:6px;padding:6px 9px;font-size:12.5px;background:var(--bg);color:var(--t);font-family:'DM Sans',sans-serif;outline:none;}
+.mfield-area{border:1px solid var(--bors);border-radius:6px;padding:6px 9px;font-size:12px;background:var(--bg);color:var(--t);font-family:'DM Sans',sans-serif;resize:vertical;min-height:52px;outline:none;width:100%;}
+.mfield-area:focus{border-color:var(--pum);}
+.moodle-check-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:.5rem;}
+.mcheck{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--t2);cursor:pointer;padding:5px 8px;border-radius:6px;border:1px solid var(--bor);}
+.mcheck:hover{background:var(--sur2);}
+.mcheck input{width:14px;height:14px;cursor:pointer;accent-color:var(--pu);}
+.mcheck.checked{background:var(--pul);border-color:var(--pum);color:var(--pu);}
+.mbadge-ok{font-size:10px;padding:1px 7px;border-radius:99px;background:var(--grl);color:#085041;border:1px solid #9FE1CB;white-space:nowrap;}
+.mbadge-err{font-size:10px;padding:1px 7px;border-radius:99px;background:var(--rel);color:var(--re);border:1px solid #F09595;white-space:nowrap;}
+.moodle-section-title{font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.04em;margin:.5rem 0 .4rem;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--bors);border-radius:99px;}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <div class="layout">
+    <aside class="sidebar">
+      <div class="sh"><div class="brand"><div class="bi"><i class="ti ti-clipboard-check"></i></div><div class="bn">QA Revisor <span>CFT San Agustín</span></div></div></div>
+      <nav class="snav">
+        <div class="nlbl">Módulos</div>
+        <button class="ntab tab-dash" id="tab-dashboard" onclick="setTab('dashboard')"><i class="ti ti-layout-dashboard" style="font-size:15px"></i> Dashboard</button>
+        <button class="ntab" id="tab-revisar" onclick="setTab('revisar')"><i class="ti ti-clipboard-list" style="font-size:15px"></i> Revisión</button>
+        <button class="ntab tab-ref" id="tab-referencias" onclick="setTab('referencias')"><i class="ti ti-books" style="font-size:15px"></i> Referencias</button>
+        <button class="ntab tab-kit" id="tab-kit" onclick="setTab('kit')"><i class="ti ti-palette" style="font-size:15px"></i> Kit de marca</button>
+        <div class="nlbl" id="nav-cl">Carreras</div>
+        <div id="nav"></div>
+      </nav>
+    </aside>
+    <div class="ma">
+      <div class="topbar"><div style="flex:1"><div class="tbtitle" id="tbtitle">Selecciona una carrera</div></div><div class="chips" id="chips"></div></div>
+      <div class="content" id="content">
+        <div class="empty"><div class="eicon"><i class="ti ti-photo-scan"></i></div><h2>IA con visión de recursos</h2><p>Selecciona carrera y ciclo. Sube capturas para que la IA analice y comente cada recurso.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+var CARRERAS=[{id:"emp",name:"Técnico en Gestión de Empresas",short:"Gestión de Empresas",color:"#534AB7"},{id:"cont",name:"Técnico en Gestión Contable",short:"Gestión Contable",color:"#1D9E75"},{id:"pub",name:"Técnico en Administración Pública",short:"Adm. Pública",color:"#185FA5"},{id:"log",name:"Técnico en Gestión Logística",short:"Gestión Logística",color:"#D85A30"}];
+var MODULOS={emp:{1:["Economía","Comunicación"],2:["Gestión del Capital Humano","Uso de tecnologías de la información"],3:["Matemáticas","Gestión Contable"],4:["Matemáticas Financiera","Desarrollo Personal"],5:["Tecnologías para el Trabajo","Administración Estratégica"],6:["Derecho Empresarial","Recursos Humanos"]},cont:{1:["Desarrollo Contable I","Matemáticas"],2:["Derecho Empresarial","Comunicación"],3:["Uso de Tecnología de la Información","Proceso Administrativo y Estratégico"],4:["Desarrollo Personal","Desarrollo Contable II"],5:["Remuneraciones y legislación laboral","Uso de Herramientas Estadísticas"],6:["Análisis de Costo y Presupuesto","Tecnologías para el trabajo"]},pub:{1:["Estructura y Funciones de la Administración Pública","Fundamentos de Economía"],2:["Normas Básicas del Derecho Administrativo chileno","Herramientas Tecnológicas I para la función pública"],3:["Desarrollo Personal","Bases Generales del Derecho"],4:["Herramientas Tecnológicas II para la función pública","Contabilidad"],5:["Contabilidad Pública","Práctica Intermedia"],6:["Ética Personal","Herramientas de Análisis para la gestión"]},log:{1:["Introducción a la logística","Matemáticas"],2:["Procesos Operativos en Logística","Desarrollo Personal"],3:["Uso de Tecnologías de la Información","Comunicación"],4:["Estándares de Seguridad en Logística","Gestión de Almacenamiento de Inventarios"],5:["Inglés Técnico","Matemáticas Financieras"],6:["Optimización de Operaciones Logísticas","Ética Personal"]}};
+var ESTADOS={emp:{1:["Validado","Validado"],2:["Modificaciones","Validado"],3:["Validado","En revisión"],4:["En producción","Validado"],5:["En producción","En producción"],6:["En producción","En producción"]},cont:{1:["Validado","Validado"],2:["Modificaciones","Validado"],3:["Validado","En revisión"],4:["Validado","En producción"],5:["En producción","En producción"],6:["En producción","En producción"]},pub:{1:["Modificaciones","Modificaciones"],2:["Modificaciones","Modificaciones"],3:["Validado","En revisión"],4:["En producción","En producción"],5:["En producción","En producción"],6:["En producción","En producción"]},log:{1:["Modificaciones","Validado"],2:["Modificaciones","Validado"],3:["Validado","Validado"],4:["En producción","En producción"],5:["En producción","En producción"],6:["En producción","En producción"]}};
+/* Recursos por semana — estructura exacta del checklist real */
+var RECURSOS_POR_SEM={
+  1:[{id:"r1",name:"¿Qué sabes sobre...?",tipo:"Infografía",tc:"ti2",hint:"Sube captura de la infografía."},{id:"r2",name:"Material de estudio",tipo:"PDF",tc:"tp",hint:"Sube capturas de páginas con problemas."},{id:"r3",name:"Recurso de aprendizaje 1",tipo:"Video / Interactivo",tc:"tv",hint:"Capturas de slides o pantalla del recurso."},{id:"r4",name:"Recurso de aprendizaje 2",tipo:"Video / Interactivo",tc:"tv",hint:"Capturas de slides o pantalla del recurso."},{id:"r5",name:"Actividad formativa",tipo:"Cuestionario",tc:"tc",hint:"Captura del cuestionario en Moodle."},{id:"r6",name:"¿Qué aprendí esta semana?",tipo:"Foro",tc:"tf",hint:"Captura de la consigna del foro."}],
+  2:[{id:"r1",name:"¿Qué sabes sobre...?",tipo:"Infografía",tc:"ti2",hint:"Sube captura de la infografía."},{id:"r2",name:"Material de estudio",tipo:"PDF",tc:"tp",hint:"Sube capturas de páginas con problemas."},{id:"r3",name:"Recurso de aprendizaje 1",tipo:"Video / Interactivo",tc:"tv",hint:"Capturas de slides o pantalla del recurso."},{id:"r4",name:"Recurso de aprendizaje 2",tipo:"Video / Interactivo",tc:"tv",hint:"Capturas de slides o pantalla del recurso."},{id:"r5",name:"Actividad sumativa",tipo:"Cuestionario",tc:"tc",hint:"Captura del cuestionario sumativo en Moodle."},{id:"r6",name:"¿Qué aprendí esta semana?",tipo:"Foro",tc:"tf",hint:"Captura de la consigna del foro."}],
+  3:[{id:"r1",name:"¿Qué sabes sobre...?",tipo:"Infografía",tc:"ti2",hint:"Sube captura de la infografía."},{id:"r2",name:"Material de estudio",tipo:"PDF",tc:"tp",hint:"Sube capturas de páginas con problemas."},{id:"r3",name:"Recurso de aprendizaje 1",tipo:"Video / Interactivo",tc:"tv",hint:"Capturas de slides o pantalla del recurso."},{id:"r4",name:"Recurso de aprendizaje 2",tipo:"Video / Interactivo",tc:"tv",hint:"Capturas de slides o pantalla del recurso."},{id:"r5",name:"Actividad formativa",tipo:"Cuestionario",tc:"tc",hint:"Captura del cuestionario en Moodle."},{id:"r6",name:"¿Qué aprendí esta semana?",tipo:"Foro",tc:"tf",hint:"Captura de la consigna del foro."}],
+  4:[{id:"r1",name:"¿Qué sabes sobre...?",tipo:"Infografía",tc:"ti2",hint:"Sube captura de la infografía."},{id:"r2",name:"Material de estudio",tipo:"PDF",tc:"tp",hint:"Sube capturas de páginas con problemas."},{id:"r3",name:"Recurso de aprendizaje 1",tipo:"Video / Interactivo",tc:"tv",hint:"Capturas de slides o pantalla del recurso."},{id:"r4",name:"Recurso de aprendizaje 2",tipo:"Video / Interactivo",tc:"tv",hint:"Capturas de slides o pantalla del recurso."},{id:"r5",name:"Actividad formativa",tipo:"Cuestionario",tc:"tc",hint:"Captura del cuestionario en Moodle."},{id:"r6",name:"¿Qué aprendí esta semana?",tipo:"Foro",tc:"tf",hint:"Captura de la consigna del foro."}],
+  5:[{id:"r1",name:"¿Qué sabes sobre...?",tipo:"Infografía",tc:"ti2",hint:"Sube captura de la infografía."},{id:"r2",name:"Material de estudio",tipo:"PDF",tc:"tp",hint:"Sube capturas de páginas con problemas."},{id:"r3",name:"Recurso de aprendizaje 1",tipo:"Video / Interactivo",tc:"tv",hint:"Capturas de slides o pantalla del recurso."},{id:"r4",name:"Recurso de aprendizaje 2",tipo:"Video / Interactivo",tc:"tv",hint:"Capturas de slides o pantalla del recurso."},{id:"r5",name:"Evaluación sumativa",tipo:"Cuestionario",tc:"tc",hint:"Captura de la evaluación sumativa en Moodle."},{id:"r6",name:"¿Qué aprendí esta semana?",tipo:"Foro",tc:"tf",hint:"Captura de la consigna del foro."}],
+  6:[{id:"r1",name:"¿Qué sabes sobre...?",tipo:"Infografía",tc:"ti2",hint:"Sube captura de la infografía."},{id:"r2",name:"Material de estudio",tipo:"PDF",tc:"tp",hint:"Sube capturas de páginas con problemas."},{id:"r3",name:"Recurso de aprendizaje 1",tipo:"Video / Interactivo",tc:"tv",hint:"Capturas de slides o pantalla del recurso."},{id:"r4",name:"Recurso de aprendizaje 2",tipo:"Video / Interactivo",tc:"tv",hint:"Capturas de slides o pantalla del recurso."},{id:"r5",name:"Actividad formativa",tipo:"Cuestionario",tc:"tc",hint:"Captura del cuestionario en Moodle."},{id:"r6",name:"¿Qué aprendí esta semana?",tipo:"Foro",tc:"tf",hint:"Captura de la consigna del foro."}],
+  7:[{id:"r1",name:"¿Qué sabes sobre...?",tipo:"Infografía",tc:"ti2",hint:"Sube captura de la infografía."},{id:"r2",name:"Material de estudio",tipo:"PDF",tc:"tp",hint:"Sube capturas de páginas con problemas."},{id:"r3",name:"Recurso de aprendizaje 1",tipo:"Video / Interactivo",tc:"tv",hint:"Capturas de slides o pantalla del recurso."},{id:"r4",name:"Recurso de aprendizaje 2",tipo:"Video / Interactivo",tc:"tv",hint:"Capturas de slides o pantalla del recurso."},{id:"r5",name:"Evaluación sumativa",tipo:"Cuestionario",tc:"tc",hint:"Captura de la evaluación sumativa en Moodle."},{id:"r6",name:"¿Qué aprendí esta semana?",tipo:"Foro",tc:"tf",hint:"Captura de la consigna del foro."}],
+  8:[{id:"r1",name:"Examen final",tipo:"Cuestionario",tc:"tc",hint:"Captura del examen final en Moodle."},{id:"r2",name:"Examen final recuperativo",tipo:"Cuestionario",tc:"tc",hint:"Captura del examen final recuperativo en Moodle."}]
+};
+var RECURSOS=RECURSOS_POR_SEM[1];
+function getRecursosSem(sem){
+  if(sem===0)return RECURSOS_S0;
+  return RECURSOS_POR_SEM[sem]||RECURSOS_POR_SEM[1];
+}
+/* TIPOS DE MÓDULO */
+var MOD_BASICO={color:"#AADBFC",texto:"#0C447C",label:"Básico"};
+var MOD_TRANSVERSAL={color:"#8F8AF9",texto:"#26215C",label:"Transversal"};
+var MOD_TECNICO={color:"#FC8B27",texto:"#4A1B0C",label:"Técnico"};
+var PALABRAS_BASICO=["matemática","matemáticas","comunicación","uso de tecnología","uso de tecnologías","tecnologías de la información","tecnología de la información"];
+var PALABRAS_TRANSVERSAL=["desarrollo personal","ética personal","formación para el trabajo"];
+function tipoModulo(nombre){
+  var n=nombre.toLowerCase();
+  for(var i=0;i<PALABRAS_BASICO.length;i++){if(n.indexOf(PALABRAS_BASICO[i])>=0)return MOD_BASICO;}
+  for(var i=0;i<PALABRAS_TRANSVERSAL.length;i++){if(n.indexOf(PALABRAS_TRANSVERSAL[i])>=0)return MOD_TRANSVERSAL;}
+  return MOD_TECNICO;
+}
+var RECURSOS_S0=[
+  {id:"s0r1",name:"Video de introducción",tipo:"Video / Interactivo",tc:"tv",hint:"Sube captura del slide de portada del video de introducción."},
+  {id:"s0r2",name:"Foro de bienvenida y presentación",tipo:"Foro",tc:"tf",hint:"Sube captura de la consigna del foro de bienvenida en Moodle."},
+  {id:"s0r3",name:"Evaluación diagnóstica",tipo:"Cuestionario",tc:"tc",hint:"Sube captura de la evaluación diagnóstica en Moodle."},
+  {id:"s0r4",name:"Glosario",tipo:"PDF",tc:"tp",hint:"Sube captura del glosario PDF."}
+];
+var REF_TIPOS=[{id:"imagen",label:"Infografía / Imagen",icon:"ti-photo",color:"#185FA5",bg:"#E6F1FB",desc:"Imágenes o capturas de infografías modelo."},{id:"pdf",label:"Documento PDF",icon:"ti-file-type-pdf",color:"#A32D2D",bg:"#FCEBEB",desc:"Capturas de PDFs bien formateados."},{id:"video",label:"Video / Interactivo",icon:"ti-player-play",color:"#BA7517",bg:"#FAEEDA",desc:"Capturas de slides de video o Genially modelo."}];
+var KIT_RECURSOS=[{id:"infografia",label:"Infografía",icon:"ti-photo",color:"#185FA5",bg:"#E6F1FB"},{id:"video",label:"Video",icon:"ti-player-play",color:"#BA7517",bg:"#FAEEDA"},{id:"pdf",label:"Documento PDF",icon:"ti-file-type-pdf",color:"#A32D2D",bg:"#FCEBEB"},{id:"genially",label:"Genially / Interactivo",icon:"ti-device-desktop",color:"#534AB7",bg:"#EEEDFE"}];
+
+/* ── ESTADO GLOBAL ── */
+var KEY="proxy",TAB="revisar";
+var CURRENT_USER={name:"Usuario",email:"qa@cftsa.cl",photo:null,profile:"revisor"};
+var SELECTED_PROFILE="revisor";
+var ST={car:null,cic:null,mod:null,sem:null,omods:{},orecs:{},rev:{},imgs:{}};
+var REFS={imagen:[],pdf:[],video:[]};
+var KIT={
+  infografia:{colores:["#1b7bb6","#0f4596","#b9d8f8","#FC8B27","#8F8AF9","#AADBFC"],ilustraciones:[],iconos:[],
+    notasColor:"Primarios CFT: #1b7bb6 (azul), #0f4596 (azul oscuro), #b9d8f8 (azul claro). Módulos: Técnico #FC8B27 (naranja), Transversal #8F8AF9 (morado), Básico #AADBFC (celeste). Usar el color del módulo correspondiente en elementos clave.",
+    fuentePrincipal:"Montserrat",fuenteSecundaria:"Open Sans"},
+  video:{colores:["#1b7bb6","#0f4596","#b9d8f8","#FC8B27","#8F8AF9","#AADBFC"],ilustraciones:[],iconos:[],
+    notasColor:"Primarios CFT: #1b7bb6, #0f4596, #b9d8f8. Color del módulo en elementos clave de cada slide: Técnico #FC8B27, Transversal #8F8AF9, Básico #AADBFC.",
+    fuentePrincipal:"Montserrat",fuenteSecundaria:"Open Sans"},
+  pdf:{colores:["#1b7bb6","#0f4596","#b9d8f8","#FC8B27","#8F8AF9","#AADBFC"],ilustraciones:[],iconos:[],
+    notasColor:"Primarios CFT: #1b7bb6, #0f4596, #b9d8f8. Encabezados en color del módulo: Técnico #FC8B27, Transversal #8F8AF9, Básico #AADBFC.",
+    fuentePrincipal:"Montserrat",fuenteSecundaria:"Open Sans"},
+  genially:{colores:["#1b7bb6","#0f4596","#b9d8f8","#FC8B27","#8F8AF9","#AADBFC"],ilustraciones:[],iconos:[],
+    notasColor:"Primarios CFT: #1b7bb6, #0f4596, #b9d8f8. Botones de navegación en color del módulo: Técnico #FC8B27, Transversal #8F8AF9, Básico #AADBFC.",
+    fuentePrincipal:"Montserrat",fuenteSecundaria:"Open Sans"}
+};
+var ACTIVE_KIT="infografia";
+
+function rk(a,b,c,d,e){return a+"_"+b+"_"+c+"_"+d+"_"+e;}
+function saveRev(){try{localStorage.setItem("qa_rev",JSON.stringify(ST.rev));}catch(e){}}
+function saveRefs(){try{localStorage.setItem("qa_refs",JSON.stringify(REFS));}catch(e){}}
+function saveKit(){try{localStorage.setItem("qa_kit",JSON.stringify(KIT));}catch(e){}}
+
+/* ── INICIALIZACIÓN ── */
+window.addEventListener("load",function(){
+  try{var r=localStorage.getItem("qa_rev");if(r)ST.rev=JSON.parse(r);}catch(e){}
+  try{var rf=localStorage.getItem("qa_refs");if(rf)REFS=JSON.parse(rf);}catch(e){}
+  try{var kf=localStorage.getItem("qa_kit");if(kf)KIT=JSON.parse(kf);}catch(e){}
+  try{var mf=localStorage.getItem("qa_moodle");if(mf)MOODLE_DATA=JSON.parse(mf);}catch(e){}
+  /* Entrar directo sin login */
+  document.getElementById("app").style.display="block";
+  setTab("revisar");renderNav();renderChips();
+});
+
+/* ── FUNCIONES AUTH ── */
+
+var DASH_VIEW="carreras";
+var DASH_SORT={ciclos:{col:"carrera",dir:1},modulos:{col:"carrera",dir:1}};
+var DASH_FILTER={ciclos:{carrera:"",estado:""},modulos:{carrera:"",tipo:"",estado:""}};
+var DASH_CAR_DETAIL=null;
+function setTab(tab){
+  TAB=tab;
+  ["dashboard","revisar","referencias","kit"].forEach(function(t){
+    var el=document.getElementById("tab-"+t);if(!el)return;
+    el.className="ntab"+(t==="referencias"?" tab-ref":t==="kit"?" tab-kit":t==="dashboard"?" tab-dash":"")+(tab===t?" active":"");
+  });
+  var nc=document.getElementById("nav-cl");var nav=document.getElementById("nav");
+  if(tab==="revisar"){nc.style.display="";nav.style.display="";renderContent();}
+  else if(tab==="referencias"){nc.style.display="none";nav.style.display="none";document.getElementById("tbtitle").textContent="Banco de referencias";renderReferencias();}
+  else if(tab==="kit"){nc.style.display="none";nav.style.display="none";document.getElementById("tbtitle").textContent="Kit de marca";renderKit();}
+  else if(tab==="dashboard"){nc.style.display="none";nav.style.display="none";document.getElementById("tbtitle").textContent="Dashboard de avance";renderDashboard();}
+}
+
+/* ── CÁLCULOS DE MÉTRICAS ── */
+function calcMetricas(){
+  /* Cuenta recursos totales y revisados por carrera/ciclo/módulo */
+  var result={};
+  CARRERAS.forEach(function(car){
+    result[car.id]={name:car.name,short:car.short,color:car.color,ciclos:{}};
+    for(var cic=1;cic<=6;cic++){
+      var mods=MODULOS[car.id][cic]||[];
+      result[car.id].ciclos[cic]={mods:[]};
+      mods.forEach(function(mod,mi){
+        var modData={name:mod,tipo:tipoModulo(mod),semanas:{}};
+        /* Semana 0 + semanas 1-8 */
+        [0,1,2,3,4,5,6,7,8].forEach(function(sem){
+          var recs=getRecursosSem(sem);
+          var semData={total:recs.length,ok:0,warn:0,err:0,pendiente:0};
+          recs.forEach(function(r){
+            var rv=ST.rev[rk(car.id,cic,mi,sem,r.id)]||{};
+            if(rv.estado==="ok")semData.ok++;
+            else if(rv.estado==="warn")semData.warn++;
+            else if(rv.estado==="err")semData.err++;
+            else semData.pendiente++;
+          });
+          modData.semanas[sem]=semData;
+        });
+        result[car.id].ciclos[cic].mods.push(modData);
+      });
+    }
+  });
+  return result;
+}
+
+function calcResumen(metricas){
+  var tot=0,ok=0,warn=0,err=0,pend=0,semsCompletas=0,semsTot=0;
+  CARRERAS.forEach(function(car){
+    for(var cic=1;cic<=6;cic++){
+      metricas[car.id].ciclos[cic].mods.forEach(function(mod){
+        [0,1,2,3,4,5,6,7,8].forEach(function(sem){
+          var s=mod.semanas[sem];
+          tot+=s.total;ok+=s.ok;warn+=s.warn;err+=s.err;pend+=s.pendiente;
+          semsTot++;
+          if(s.total>0&&s.ok+s.warn+s.err===s.total)semsCompletas++;
+        });
+      });
+    }
+  });
+  return{tot:tot,ok:ok,warn:warn,err:err,pend:pend,semsCompletas:semsCompletas,semsTot:semsTot};
+}
+function calcCarrera(metricas,carId){
+  var tot=0,ok=0,warn=0,err=0,pend=0,semsCompletas=0,semsTot=0;
+  for(var cic=1;cic<=6;cic++){
+    metricas[carId].ciclos[cic].mods.forEach(function(mod){
+      [0,1,2,3,4,5,6,7,8].forEach(function(sem){
+        var s=mod.semanas[sem];
+        tot+=s.total;ok+=s.ok;warn+=s.warn;err+=s.err;pend+=s.pendiente;
+        semsTot++;
+        if(s.total>0&&s.ok+s.warn+s.err===s.total)semsCompletas++;
+      });
+    });
+  }
+  return{tot:tot,ok:ok,warn:warn,err:err,pend:pend,semsCompletas:semsCompletas,semsTot:semsTot};
+}
+function calcCiclo(metricas,carId,cic){
+  var tot=0,ok=0,warn=0,err=0,pend=0,semsCompletas=0,semsTot=0;
+  metricas[carId].ciclos[cic].mods.forEach(function(mod){
+    [0,1,2,3,4,5,6,7,8].forEach(function(sem){
+      var s=mod.semanas[sem];
+      tot+=s.total;ok+=s.ok;warn+=s.warn;err+=s.err;pend+=s.pendiente;
+      semsTot++;
+      if(s.total>0&&s.ok+s.warn+s.err===s.total)semsCompletas++;
+    });
+  });
+  return{tot:tot,ok:ok,warn:warn,err:err,pend:pend,semsCompletas:semsCompletas,semsTot:semsTot};
+}
+
+function pct(n,d){return d===0?0:Math.round(n/d*100);}
+function minBar(ok,warn,err,tot){
+  var pw=pct(ok,tot),ww=pct(warn,tot),ew=pct(err,tot),pw2=100-pw-ww-ew;
+  return '<div class="dash-mini-bar">'+
+    (pw?'<div class="dash-mini-seg" style="width:'+pw+'%;background:#1D9E75"></div>':'')+
+    (ww?'<div class="dash-mini-seg" style="width:'+ww+'%;background:#EF9F27"></div>':'')+
+    (ew?'<div class="dash-mini-seg" style="width:'+ew+'%;background:#E24B4A"></div>':'')+
+    (pw2>0?'<div class="dash-mini-seg" style="width:'+pw2+'%;background:var(--sur2)"></div>':'')+
+  '</div>';
+}
+
+function tiempoEstimado(pend){
+  /* Asumiendo ~3 min por recurso con IA */
+  var mins=pend*3;
+  if(mins<60)return mins+" min";
+  var hrs=Math.floor(mins/60);var m=mins%60;
+  return hrs+"h "+(m>0?m+"min":"");
+}
+
+function renderDashboard(){
+  var el=document.getElementById("content");
+  var metricas=calcMetricas();
+  var resumen=calcResumen(metricas);
+  var pctGlobal=pct(resumen.ok+resumen.warn+resumen.err,resumen.tot);
+
+  var html='<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">';
+  html+='<div><div class="page-title"><i class="ti ti-layout-dashboard" style="color:var(--bl)"></i> Dashboard de avance</div><div class="page-sub" style="margin:0">Progreso de revisión QA — CFT San Agustín Sede Online</div></div>';
+  html+='</div>';
+
+  /* KPIs globales */
+  html+='<div class="dash-kpi-grid">';
+  html+='<div class="dash-kpi"><i class="ti ti-chart-pie dash-kpi-icon"></i><div class="dash-kpi-label">Avance global</div><div class="dash-kpi-val" style="color:var(--bl)">'+pctGlobal+'%</div><div class="dash-kpi-sub">'+( resumen.ok+resumen.warn+resumen.err)+' de '+resumen.tot+' recursos revisados</div><div class="dash-kpi-bar"><div class="dash-kpi-bar-fill" style="width:'+pctGlobal+'%;background:var(--bl)"></div></div></div>';
+  html+='<div class="dash-kpi"><i class="ti ti-circle-check dash-kpi-icon" style="color:var(--gr)"></i><div class="dash-kpi-label">Aprobados</div><div class="dash-kpi-val" style="color:var(--gr)">'+resumen.ok+'</div><div class="dash-kpi-sub">'+pct(resumen.ok,resumen.tot)+'% del total</div><div class="dash-kpi-bar"><div class="dash-kpi-bar-fill" style="width:'+pct(resumen.ok,resumen.tot)+'%;background:var(--gr)"></div></div></div>';
+  html+='<div class="dash-kpi"><i class="ti ti-alert-triangle dash-kpi-icon" style="color:var(--am)"></i><div class="dash-kpi-label">Con correcciones</div><div class="dash-kpi-val" style="color:var(--am)">'+resumen.warn+'</div><div class="dash-kpi-sub">'+pct(resumen.warn,resumen.tot)+'% del total</div><div class="dash-kpi-bar"><div class="dash-kpi-bar-fill" style="width:'+pct(resumen.warn,resumen.tot)+'%;background:var(--am)"></div></div></div>';
+  html+='<div class="dash-kpi"><i class="ti ti-clock dash-kpi-icon" style="color:var(--pu)"></i><div class="dash-kpi-label">Sin revisar</div><div class="dash-kpi-val" style="color:var(--pu)">'+resumen.pend+'</div><div class="dash-kpi-sub">~'+tiempoEstimado(resumen.pend)+' estimados con IA</div><div class="dash-kpi-bar"><div class="dash-kpi-bar-fill" style="width:'+pct(resumen.pend,resumen.tot)+'%;background:var(--pu)"></div></div></div>';
+  html+='</div>';
+
+  /* Alerta de pendientes urgentes */
+  var urgentes=[];
+  CARRERAS.forEach(function(car){
+    for(var cic=1;cic<=6;cic++){
+      var c=calcCiclo(metricas,car.id,cic);
+      var revisados=c.ok+c.warn+c.err;
+      /* Solo mostrar si ya se empezó a revisar pero tiene menos del 30% */
+      if(revisados>0&&pct(revisados,c.tot)<30){
+        urgentes.push(car.short+" Ciclo "+cic+" ("+pct(revisados,c.tot)+"% avanzado)");
+      }
+    }
+  });
+  if(urgentes.length>0){
+    html+='<div class="dash-alert-box"><div><i class="ti ti-alert-circle" style="font-size:20px;color:#854F0B;margin-top:2px"></i></div><div><div class="dash-alert-title">Ciclos con menos del 20% de avance</div><div class="dash-alert-list">'+urgentes.join(" · ")+'</div></div></div>';
+  }
+
+  /* Tiempo estimado total */
+  if(resumen.pend>0){
+    html+='<div class="dash-tiempo"><div class="dash-tiempo-icon"><i class="ti ti-clock-play"></i></div><div><div class="dash-tiempo-title">Tiempo estimado para completar la revisión</div><div class="dash-tiempo-sub">'+resumen.pend+' recursos pendientes × 3 min con IA = aproximadamente <strong>'+tiempoEstimado(resumen.pend)+'</strong> de trabajo</div></div></div>';
+  }
+
+  /* Tabs de vista */
+  html+='<div class="dash-view-tabs">';
+  html+='<button class="dash-vtab'+(DASH_VIEW==="carreras"?" active":"")+'" onclick="setDashView(\'carreras\')"><i class="ti ti-school" style="font-size:13px"></i> Por carrera</button>';
+  html+='<button class="dash-vtab'+(DASH_VIEW==="ciclos"?" active":"")+'" onclick="setDashView(\'ciclos\')"><i class="ti ti-list-details" style="font-size:13px"></i> Por ciclo</button>';
+  html+='<button class="dash-vtab'+(DASH_VIEW==="modulos"?" active":"")+'" onclick="setDashView(\'modulos\')"><i class="ti ti-book-2" style="font-size:13px"></i> Por módulo</button>';
+  html+='</div>';
+
+  /* ── VISTA POR CARRERA ── */
+  if(DASH_VIEW==="carreras"){
+    if(DASH_CAR_DETAIL){
+      var car=CARRERAS.find(function(c){return c.id===DASH_CAR_DETAIL;});
+      html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">';
+      html+='<button onclick="setCarDetail(null)" style="border:0.5px solid var(--bors);background:transparent;border-radius:7px;padding:5px 10px;cursor:pointer;font-size:12px;font-family:\'DM Sans\',sans-serif;color:var(--t2);display:flex;align-items:center;gap:5px;"><i class="ti ti-arrow-left" style="font-size:13px"></i> Volver</button>';
+      html+='<div style="font-size:15px;font-weight:600;color:'+car.color+'"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+car.color+';margin-right:6px"></span>'+car.name+'</div>';
+      html+='</div>';
+      html+='<table class="dash-ciclo-table"><thead><tr><th>Ciclo</th><th>Módulo</th><th>Tipo</th><th>Avance</th><th>Dist.</th><th>✓ Ok</th><th>⚠ Corr.</th><th>✗ Rec.</th><th>⏳ Pend.</th><th></th></tr></thead><tbody>';
+      for(var cic2=1;cic2<=6;cic2++){
+        var mods2=metricas[car.id].ciclos[cic2].mods;
+        mods2.forEach(function(mod,mi){
+          var tot=0,ok=0,warn=0,err=0,pend=0;
+          [0,1,2,3,4,5,6,7,8].forEach(function(sem){var s=mod.semanas[sem];tot+=s.total;ok+=s.ok;warn+=s.warn;err+=s.err;pend+=s.pendiente;});
+          var p=pct(ok+warn+err,tot);var tm=mod.tipo;
+          html+='<tr style="cursor:pointer" onclick="irA(\''+car.id+'\','+cic2+')">';
+          html+='<td><strong style="color:'+car.color+'">Ciclo '+cic2+'</strong></td>';
+          html+='<td style="font-weight:500;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+mod.name+'">'+mod.name+'</td>';
+          html+='<td><span class="dash-status-pill" style="background:'+tm.color+';color:'+tm.texto+'">'+tm.label+'</span></td>';
+          html+='<td><span style="font-weight:600;color:'+(p===100?'var(--gr)':p>0?'var(--am)':'var(--t3)')+'">'+p+'%</span></td>';
+          html+='<td>'+minBar(ok,warn,err,tot)+'</td>';
+          html+='<td style="color:#085041;font-weight:500">'+ok+'</td>';
+          html+='<td style="color:#633806;font-weight:500">'+warn+'</td>';
+          html+='<td style="color:var(--re);font-weight:500">'+err+'</td>';
+          html+='<td style="color:var(--pu);font-weight:500">'+pend+'</td>';
+          html+='<td><button class="dash-go-btn" onclick="event.stopPropagation();irA(\''+car.id+'\','+cic2+')">Ir →</button></td>';
+          html+='</tr>';
+        });
+      }
+      html+='</tbody></table>';
+    } else {
+      html+='<div style="font-size:12px;color:var(--t3);margin-bottom:.75rem;"><i class="ti ti-hand-click" style="font-size:12px"></i> Haz clic en una carrera para ver el detalle por ciclo y módulo</div>';
+      html+='<div class="dash-car-grid">';
+      CARRERAS.forEach(function(car){
+        var c=calcCarrera(metricas,car.id);
+        var p=pct(c.ok+c.warn+c.err,c.tot);
+        html+='<div class="dash-car-card" onclick="setCarDetail(\''+car.id+'\')" style="cursor:pointer;" onmouseover="this.style.boxShadow=\'0 2px 12px rgba(0,0,0,.08)\'" onmouseout="this.style.boxShadow=\'none\'">';
+        html+='<div class="dash-car-header">';
+        html+='<div class="dash-car-icon" style="background:'+car.color+'18;color:'+car.color+'"><i class="ti ti-school"></i></div>';
+        html+='<div class="dash-car-name">'+car.name+'</div>';
+        html+='<div style="display:flex;align-items:center;gap:8px;"><div class="dash-car-pct" style="color:'+car.color+'">'+p+'%</div><i class="ti ti-chevron-right" style="font-size:14px;color:var(--t3)"></i></div>';
+        html+='</div>';
+        html+='<div class="dash-car-body">';
+        html+='<div class="dash-bar-row"><div class="dash-bar-lbl">Aprobados</div><div class="dash-bar-track"><div class="dash-bar-fill" style="width:'+pct(c.ok,c.tot)+'%;background:#1D9E75"></div></div><div class="dash-bar-num">'+c.ok+'</div></div>';
+        html+='<div class="dash-bar-row"><div class="dash-bar-lbl">Correcciones</div><div class="dash-bar-track"><div class="dash-bar-fill" style="width:'+pct(c.warn,c.tot)+'%;background:#EF9F27"></div></div><div class="dash-bar-num">'+c.warn+'</div></div>';
+        html+='<div class="dash-bar-row"><div class="dash-bar-lbl">Rechazados</div><div class="dash-bar-track"><div class="dash-bar-fill" style="width:'+pct(c.err,c.tot)+'%;background:#E24B4A"></div></div><div class="dash-bar-num">'+c.err+'</div></div>';
+        html+='<div class="dash-bar-row"><div class="dash-bar-lbl">Sin revisar</div><div class="dash-bar-track"><div class="dash-bar-fill" style="width:'+pct(c.pend,c.tot)+'%;background:var(--sur2)"></div></div><div class="dash-bar-num">'+c.pend+'</div></div>';
+        html+='<div style="margin-top:.75rem;padding-top:.75rem;border-top:1px solid var(--bor);display:flex;justify-content:space-between;font-size:11px;color:var(--t2);">';
+        html+='<span><i class="ti ti-calendar-check" style="font-size:11px"></i> '+c.semsCompletas+'/'+c.semsTot+' semanas</span>';
+        html+='<span style="color:var(--pu)"><i class="ti ti-clock" style="font-size:11px"></i> ~'+tiempoEstimado(c.pend)+' pendiente</span>';
+        html+='</div></div></div>';
+      });
+      html+='</div>';
+    }
+  }
+
+  /* ── VISTA POR CICLO ── */
+  else if(DASH_VIEW==="ciclos"){
+    html+='<table class="dash-ciclo-table"><thead><tr>';
+    html+='<th>Carrera</th><th>Ciclo</th><th>Avance</th><th>Distribución</th><th>✓ Ok</th><th>⚠ Corr.</th><th>✗ Rec.</th><th>⏳ Pend.</th><th>Tiempo</th><th></th>';
+    html+='</tr></thead><tbody>';
+    CARRERAS.forEach(function(car){
+      for(var cic=1;cic<=6;cic++){
+        var c=calcCiclo(metricas,car.id,cic);
+        var p=pct(c.ok+c.warn+c.err,c.tot);
+        var statusCls=p===100?"dsp-v":p===0?"dsp-p":c.err>0?"dsp-r":"dsp-c";
+        var statusTxt=p===100?"Completo":p===0?"Sin iniciar":c.err>0?"Con rechazos":"En progreso";
+        html+='<tr>';
+        html+='<td><span style="display:flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:'+car.color+';flex-shrink:0;display:inline-block"></span>'+car.short+'</span></td>';
+        html+='<td><strong>Ciclo '+cic+'</strong></td>';
+        html+='<td><span style="font-weight:600;color:'+(p===100?'var(--gr)':p>50?'var(--am)':'var(--re)')+'">'+p+'%</span></td>';
+        html+='<td>'+minBar(c.ok,c.warn,c.err,c.tot)+'</td>';
+        html+='<td style="color:#085041;font-weight:500">'+c.ok+'</td>';
+        html+='<td style="color:#633806;font-weight:500">'+c.warn+'</td>';
+        html+='<td style="color:var(--re);font-weight:500">'+c.err+'</td>';
+        html+='<td style="color:var(--pu);font-weight:500">'+c.pend+'</td>';
+        html+='<td style="color:var(--t3);font-size:11px;">'+( c.pend>0?tiempoEstimado(c.pend):"-")+'</td>';
+        html+='<td><button class="dash-go-btn" onclick="irA(\''+car.id+'\','+cic+')">Ir →</button></td>';
+        html+='</tr>';
+      }
+    });
+    html+='</tbody></table>';
+  }
+
+  /* ── VISTA POR MÓDULO ── */
+  else if(DASH_VIEW==="modulos"){
+    html+='<table class="dash-ciclo-table"><thead><tr>';
+    html+='<th>Módulo</th><th>Tipo</th><th>Carrera</th><th>Ciclo</th><th>Avance</th><th>Ok</th><th>Corr.</th><th>Rec.</th><th>Pend.</th><th></th>';
+    html+='</tr></thead><tbody>';
+    CARRERAS.forEach(function(car){
+      for(var cic=1;cic<=6;cic++){
+        var mods=metricas[car.id].ciclos[cic].mods;
+        mods.forEach(function(mod,mi){
+          var tot=0,ok=0,warn=0,err=0,pend=0;
+          [0,1,2,3,4,5,6,7,8].forEach(function(sem){
+            var s=mod.semanas[sem];tot+=s.total;ok+=s.ok;warn+=s.warn;err+=s.err;pend+=s.pendiente;
+          });
+          var p=pct(ok+warn+err,tot);
+          var tm=mod.tipo;
+          html+='<tr>';
+          html+='<td style="font-weight:500;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+mod.name+'">'+mod.name+'</td>';
+          html+='<td><span class="dash-status-pill" style="background:'+tm.color+';color:'+tm.texto+';">'+tm.label+'</span></td>';
+          html+='<td style="font-size:11px;color:var(--t2)">'+car.short+'</td>';
+          html+='<td style="font-size:11px;color:var(--t2)">C'+cic+'</td>';
+          html+='<td>'+minBar(ok,warn,err,tot)+'<span style="font-size:10px;color:var(--t3);margin-left:4px">'+p+'%</span></td>';
+          html+='<td style="color:#085041;font-weight:500;font-size:12px">'+ok+'</td>';
+          html+='<td style="color:#633806;font-weight:500;font-size:12px">'+warn+'</td>';
+          html+='<td style="color:var(--re);font-weight:500;font-size:12px">'+err+'</td>';
+          html+='<td style="color:var(--pu);font-weight:500;font-size:12px">'+pend+'</td>';
+          html+='<td><button class="dash-go-btn" onclick="irA(\''+car.id+'\','+cic+')">Ir →</button></td>';
+          html+='</tr>';
+        });
+      }
+    });
+    html+='</tbody></table>';
+  }
+
+  el.innerHTML=html;
+}
+
+function setCarDetail(carId){DASH_CAR_DETAIL=carId;renderDashboard();}
+function setDashView(view){DASH_VIEW=view;DASH_CAR_DETAIL=null;renderDashboard();}
+function sortDash(view,col){var s=DASH_SORT[view];if(s.col===col){s.dir*=-1;}else{s.col=col;s.dir=1;}renderDashboard();}
+function setDashFilter(view,field,val){DASH_FILTER[view][field]=val;renderDashboard();}
+function clearDashFilters(view){Object.keys(DASH_FILTER[view]).forEach(function(k){DASH_FILTER[view][k]="";});renderDashboard();}
+function irA(carId,cic){
+  ST.car=carId;ST.cic=cic;ST.sem=null;ST.mod=null;
+  setTab("revisar");renderNav();renderContent();
+}
+
+/* ── REFERENCIAS ── */
+function renderReferencias(){
+  var el=document.getElementById("content");
+  var html='<div class="page-title"><i class="ti ti-books" style="color:var(--am)"></i> Banco de referencias</div>';
+  html+='<div class="page-sub">Sube recursos modelo para cada tipo. La IA los usará como estándar de comparación al generar comentarios.</div>';
+  html+='<div class="ref-banner"><div class="ref-banner-icon"><i class="ti ti-bulb"></i></div><div><div class="ref-banner-title">¿Cómo funciona?</div><div class="ref-banner-text">1. Sube imágenes o capturas de recursos bien hechos.<br>2. Describe qué hace bien ese recurso.<br>3. Al revisar, la IA compara el recurso actual contra estas referencias y señala diferencias.</div></div></div>';
+  html+='<div class="ref-grid">';
+  for(var ti=0;ti<REF_TIPOS.length;ti++){
+    var tipo=REF_TIPOS[ti];var items=REFS[tipo.id]||[];
+    html+='<div class="ref-card"><div class="ref-ch"><div class="ref-ci" style="background:'+tipo.bg+';color:'+tipo.color+'"><i class="ti '+tipo.icon+'"></i></div><div class="ref-ct">'+tipo.label+'</div><span style="font-size:11px;padding:2px 8px;border-radius:99px;background:'+tipo.bg+';color:'+tipo.color+';font-weight:500;">'+items.length+'</span></div>';
+    html+='<div class="ref-cb"><div class="ref-desc">'+tipo.desc+'</div>';
+    html+='<div class="ref-uzone"><input type="file" accept="image/*,application/pdf" multiple onchange="addRef(\''+tipo.id+'\',this)"><i class="ti ti-upload" style="font-size:20px;color:var(--t3)"></i><div style="font-size:12px;color:var(--t2);font-weight:500;margin-top:5px;">Arrastra aquí o haz clic</div><div style="font-size:11px;color:var(--t3);margin-top:2px;">PNG, JPG, PDF</div></div>';
+    if(items.length>0){
+      html+='<div class="ref-items">';
+      for(var ii=0;ii<items.length;ii++){
+        var item=items[ii];
+        html+='<div class="ref-item">';
+        if(item.isPdf){html+='<div class="ref-iicon"><i class="ti ti-file-type-pdf"></i></div>';}
+        else{html+='<img src="'+item.b64+'" class="ref-ithumb">';}
+        html+='<div style="flex:1;min-width:0;"><div class="ref-iname">'+item.name+'</div><div class="ref-isub">'+item.size+'</div>';
+        html+='<div class="ref-dlbl">¿Qué hace bien?</div>';
+        html+='<textarea class="ref-da" data-tipo="'+tipo.id+'" data-idx="'+ii+'" onchange="saveRefDesc(\''+tipo.id+'\','+ii+',this.value)">'+( item.desc||"")+'</textarea>';
+        html+='</div><button class="ref-del" onclick="delRef(\''+tipo.id+'\','+ii+')"><i class="ti ti-trash"></i></button></div>';
+      }
+      html+='</div>';
+    }
+    html+='</div></div>';
+  }
+  html+='</div>';
+  el.innerHTML=html;
+}
+
+function addRef(tipoId,input){
+  var files=input.files;if(!files||!files.length)return;
+  var count=0,total=files.length;
+  function processFile(file){
+    var isPdf=file.type==="application/pdf";
+    if(isPdf){
+      var kb=Math.round(file.size/1024);
+      REFS[tipoId].push({id:Date.now()+"_"+Math.random(),name:file.name,b64:"",isPdf:true,desc:"",size:kb+"KB"});
+      count++;if(count===total){saveRefs();renderReferencias();toast(count+" referencia(s) agregada(s)");}
+    }else{
+      var reader=new FileReader();
+      reader.onload=function(e){
+        var img=new Image();
+        img.onload=function(){
+          var canvas=document.createElement("canvas");var MAX=1200,w=img.width,h=img.height;
+          if(w>MAX){h=Math.round(h*(MAX/w));w=MAX;}if(h>MAX){w=Math.round(w*(MAX/h));h=MAX;}
+          canvas.width=w;canvas.height=h;canvas.getContext("2d").drawImage(img,0,0,w,h);
+          var b64=canvas.toDataURL("image/jpeg",0.82);var kb=Math.round(b64.length*0.75/1024);
+          REFS[tipoId].push({id:Date.now()+"_"+Math.random(),name:file.name,b64:b64,isPdf:false,desc:"",size:kb+"KB"});
+          count++;if(count===total){saveRefs();renderReferencias();toast(count+" referencia(s) agregada(s)");}
+        };img.src=e.target.result;
+      };reader.readAsDataURL(file);
+    }
+  }
+  for(var i=0;i<files.length;i++)processFile(files[i]);
+}
+function delRef(tipoId,idx){REFS[tipoId].splice(idx,1);saveRefs();renderReferencias();}
+function saveRefDesc(tipoId,idx,val){if(REFS[tipoId]&&REFS[tipoId][idx])REFS[tipoId][idx].desc=val;saveRefs();}
+
+/* ── KIT DE MARCA ── */
+function kitCard(icon,bg,color,title,body){return '<div class="kit-card"><div class="kit-ch"><div class="kit-ci" style="background:'+bg+';color:'+color+'"><i class="ti '+icon+'"></i></div><div class="kit-ct">'+title+'</div></div><div class="kit-cb">'+body+'</div></div>';}
+function kitField(id,field,lbl,ph,val){return '<div class="kit-field"><div class="kit-flbl">'+lbl+'</div><input class="kit-finput" placeholder="'+ph+'" value="'+(val||"")+'" onchange="saveKitField(\''+id+'\',\''+field+'\',this.value)"></div>';}
+function kitArea(id,field,lbl,ph,val){return '<div class="kit-field"><div class="kit-flbl">'+lbl+'</div><textarea class="kit-ftarea" placeholder="'+ph+'" onchange="saveKitField(\''+id+'\',\''+field+'\',this.value)">'+(val||"")+'</textarea></div>';}
+function kitImgBlock(id,campo,imgs){
+  var h='<div class="kit-img-zone"><input type="file" accept="image/*" multiple onchange="addKitImg(\''+id+'\',\''+campo+'\',this)"><i class="ti ti-upload" style="font-size:18px;color:var(--t3)"></i><div style="font-size:12px;color:var(--t2);margin-top:4px;">Arrastra o haz clic</div></div>';
+  if(imgs&&imgs.length>0){h+='<div class="kit-img-grid">';for(var i=0;i<imgs.length;i++){h+='<div class="kit-img-item"><img src="'+imgs[i]+'"><button class="kit-img-del" onclick="delKitImg(\''+id+'\',\''+campo+'\','+i+')"><i class="ti ti-x"></i></button></div>';}h+='</div>';}
+  return h;
+}
+function kitColors(id,colores){
+  var h='<div class="kit-flbl">Paleta de colores</div><div class="color-list">';
+  for(var ci=0;ci<colores.length;ci++){h+='<div class="color-item"><div class="color-swatch" style="background:'+colores[ci]+'"></div>'+colores[ci]+'<button class="color-del" onclick="delColor(\''+id+'\','+ci+')"><i class="ti ti-x"></i></button></div>';}
+  h+='</div><div style="display:flex;align-items:center;gap:8px;margin-top:8px;">';
+  h+='<input type="color" id="colorpick-'+id+'" value="#534AB7" style="width:36px;height:36px;border-radius:7px;border:1px solid var(--bors);cursor:pointer;padding:2px;">';
+  h+='<button class="kit-save-btn" style="margin-top:0" onclick="addColor(\''+id+'\')"><i class="ti ti-plus"></i> Agregar color</button></div>';
+  return h;
+}
+
+function renderKitSeccion(id,kdata){
+  var h='';
+  /* ── INFOGRAFÍA ── */
+  if(id==="infografia"){
+    h+='<div class="kit-grid">';
+    h+=kitCard("ti-palette","#FAEEDA","#BA7517","Colores institucionales",kitColors(id,kdata.colores||[])+kitArea(id,"notasColor","Reglas de uso de color","Ej: Color primario del módulo siempre en el encabezado, fondo nunca negro puro...",kdata.notasColor));
+    h+=kitCard("ti-typography","#EEEDFE","#534AB7","Tipografía",kitField(id,"fuentePrincipal","Fuente principal","Ej: Montserrat Bold",kdata.fuentePrincipal)+kitField(id,"fuenteSecundaria","Fuente secundaria","Ej: Open Sans Regular",kdata.fuenteSecundaria)+kitArea(id,"reglasTypo","Jerarquía tipográfica","Ej: Título 24pt Bold, subtítulo 16pt Medium, cuerpo 12pt Regular. Nunca menos de 11pt...",kdata.reglasTypo));
+    h+=kitCard("ti-layout","#E6F1FB","#185FA5","Estructura y layout","<div class=\"kit-flbl\">Capturas de layouts correctos</div>"+kitImgBlock(id,"layouts",kdata.layouts)+kitArea(id,"estructuraLayout","Reglas de estructura","Ej: Logo en esquina superior derecha, título siempre centrado, máximo 5 bloques de contenido por slide, siempre incluir franja inferior con datos del documento...",kdata.estructuraLayout));
+    h+=kitCard("ti-brush","#E1F5EE","#085041","Ilustraciones y personajes","<div class=\"kit-flbl\">Ejemplos de ilustraciones correctas</div>"+kitImgBlock(id,"ilustraciones",kdata.ilustraciones)+kitArea(id,"criteriosIlustracion","Criterios de ilustración","Ej: Estilo flat, trazo 2px, personaje siempre presente con uniforme institucional, fondo simple sin texturas...",kdata.criteriosIlustracion));
+    h+=kitCard("ti-vector","#FCEBEB","#A32D2D","Iconos y elementos gráficos","<div class=\"kit-flbl\">Ejemplos de iconos correctos</div>"+kitImgBlock(id,"iconos",kdata.iconos)+kitArea(id,"reglasIconos","Reglas de iconos","Ej: Iconos lineales estilo outline, tamaño mínimo 24px, siempre del mismo set. No mezclar estilos de iconos...",kdata.reglasIconos));
+    h+=kitCard("ti-circles-relation","#F1EFE8","#444441","Elementos decorativos","<div class=\"kit-flbl\">Ejemplos de elementos decorativos correctos</div>"+kitImgBlock(id,"decorativos",kdata.decorativos)+kitArea(id,"reglasDecorativo","Reglas de elementos decorativos","Ej: Fondos geométricos simples, sin texturas complejas, elementos decorativos no deben superar 20% del área visual...",kdata.reglasDecorativo));
+    h+='</div>';
+  }
+  /* ── VIDEO ── */
+  else if(id==="video"){
+    h+='<div class="kit-grid">';
+    h+=kitCard("ti-palette","#FAEEDA","#BA7517","Colores institucionales",kitColors(id,kdata.colores||[])+kitArea(id,"notasColor","Reglas de uso de color","Ej: Color del módulo en elementos clave de cada slide, fondo siempre claro, nunca fondo negro...",kdata.notasColor));
+    h+=kitCard("ti-typography","#EEEDFE","#534AB7","Tipografía en slides",kitField(id,"fuentePrincipal","Fuente de títulos","Ej: Montserrat Bold",kdata.fuentePrincipal)+kitField(id,"fuenteSecundaria","Fuente de cuerpo","Ej: Open Sans",kdata.fuenteSecundaria)+kitArea(id,"reglasTypo","Tamaños y jerarquía","Ej: Título slide mínimo 28pt, texto cuerpo mínimo 16pt, nunca justificar texto en slides...",kdata.reglasTypo));
+    h+=kitCard("ti-layout-board","#E6F1FB","#185FA5","Estructura de slides","<div class=\"kit-flbl\">Capturas de slides modelo</div>"+kitImgBlock(id,"slidesModelo",kdata.slidesModelo)+kitArea(id,"estructuraSlides","Estructura requerida por slide","Ej: Slide 1 intro con logo y nombre del módulo, slides de contenido con título, ícono y cuerpo, slide final con frase de cierre completa (¡Mucho éxito en tu aprendizaje!)...",kdata.estructuraSlides));
+    h+=kitCard("ti-player-play","#E1F5EE","#085041","Animaciones y transiciones",kitArea(id,"animacionesEntrada","Animaciones de entrada","Ej: Fade in para textos, slide desde izquierda para imágenes, duración máxima 0.5 segundos...",kdata.animacionesEntrada)+kitArea(id,"animacionesSalida","Animaciones de salida","Ej: NUNCA usar animaciones de salida si el elemento permanece en el slide. Solo animar salida cuando el elemento realmente desaparece del slide...",kdata.animacionesSalida)+kitArea(id,"transiciones","Transiciones entre slides","Ej: Solo transición de fundido (fade), sin transiciones llamativas, duración 0.3 segundos máximo...",kdata.transiciones));
+    h+=kitCard("ti-user","#FBEAF0","#72243E","Personaje / Avatar","<div class=\"kit-flbl\">Ejemplos del personaje correcto</div>"+kitImgBlock(id,"personaje",kdata.personaje)+kitArea(id,"reglasPersonaje","Reglas del personaje","Ej: Personaje siempre centrado en la parte inferior del slide, tamaño entre 40-60% de la altura del slide, nunca tapar el texto, siempre con uniforme institucional...",kdata.reglasPersonaje));
+    h+=kitCard("ti-music","#F1EFE8","#444441","Audio y locución",kitArea(id,"reglasAudio","Reglas de audio","Ej: Locución clara sin ruido de fondo, volumen constante, música de fondo máximo 20% del volumen de la locución, sin cortes abruptos...",kdata.reglasAudio)+kitArea(id,"reglasLocucion","Criterios de locución","Ej: Voz profesional, ritmo pausado, pronunciación clara, el texto narrado debe coincidir exactamente con lo que se muestra en pantalla...",kdata.reglasLocucion));
+    h+=kitCard("ti-video","#E6F1FB","#185FA5","Videos de fondo e imágenes","<div class=\"kit-flbl\">Ejemplos de videos de fondo correctos</div>"+kitImgBlock(id,"videoBG",kdata.videoBG)+kitArea(id,"reglasVideoBG","Reglas de video de fondo","Ej: Acompañar al menos el 50% de los slides con video de fondo relevante al contenido. Video siempre en loop, sin audio propio, opacidad reducida para no distraer del texto...",kdata.reglasVideoBG));
+    h+=kitCard("ti-brand-canva","#EEEDFE","#534AB7","Identidad y logo","<div class=\"kit-flbl\">Ejemplos del logo y marca correctamente usados</div>"+kitImgBlock(id,"logoUso",kdata.logoUso)+kitArea(id,"reglasLogo","Posición y uso del logo","Ej: Logo CFT en slide de intro y slide final, tamaño mínimo 80px de ancho, nunca sobre fondos oscuros sin versión blanca del logo...",kdata.reglasLogo));
+    h+='</div>';
+  }
+  /* ── PDF ── */
+  else if(id==="pdf"){
+    h+='<div class="kit-grid">';
+    h+=kitCard("ti-palette","#FAEEDA","#BA7517","Colores institucionales",kitColors(id,kdata.colores||[])+kitArea(id,"notasColor","Reglas de uso de color","Ej: Encabezados en color del módulo, cuadros destacados con fondo del color del módulo al 20% de opacidad, tablas con encabezado en color primario...",kdata.notasColor));
+    h+=kitCard("ti-typography","#EEEDFE","#534AB7","Tipografía",kitField(id,"fuentePrincipal","Fuente de títulos","Ej: Montserrat Bold",kdata.fuentePrincipal)+kitField(id,"fuenteSecundaria","Fuente de cuerpo","Ej: Open Sans Regular",kdata.fuenteSecundaria)+kitArea(id,"reglasTypo","Jerarquía tipográfica","Ej: H1 20pt, H2 16pt, H3 14pt, cuerpo 11pt. Nunca justificar títulos, cuerpo justificado está permitido...",kdata.reglasTypo));
+    h+=kitCard("ti-layout","#E6F1FB","#185FA5","Portada y estructura","<div class=\"kit-flbl\">Capturas de portada modelo</div>"+kitImgBlock(id,"portada",kdata.portada)+kitArea(id,"estructuraDoc","Estructura requerida del documento","Ej: Portada con logo, nombre módulo, semana y carrera. Numeración desde página 2. Pie de página con nombre CFT e institución. Índice en documentos mayores a 5 páginas...",kdata.estructuraDoc));
+    h+=kitCard("ti-table","#E1F5EE","#085041","Tablas y cuadros","<div class=\"kit-flbl\">Capturas de tablas con formato correcto</div>"+kitImgBlock(id,"tablas",kdata.tablas)+kitArea(id,"reglasTablad","Reglas de tablas","Ej: Encabezado de tabla siempre con fondo del color del módulo y texto blanco, filas alternas con fondo gris claro, borde exterior 1.5pt, bordes interiores 0.5pt...",kdata.reglasTablad));
+    h+=kitCard("ti-photo","#FBEAF0","#72243E","Figuras e imágenes","<div class=\"kit-flbl\">Capturas de figuras correctamente diseñadas</div>"+kitImgBlock(id,"figuras",kdata.figuras)+kitArea(id,"reglasFiguras","Reglas de figuras","Ej: Toda figura debe tener pie de figura numerado (Figura 1:), las figuras NO deben ser copias del guión del DI, deben ser diseñadas en colores del módulo, resolución mínima 150dpi...",kdata.reglasFiguras));
+    h+=kitCard("ti-highlight","#F1EFE8","#444441","Cuadros de texto destacado","<div class=\"kit-flbl\">Capturas de cuadros destacados correctos</div>"+kitImgBlock(id,"cuadrosDestacado",kdata.cuadrosDestacado)+kitArea(id,"reglasCuadros","Reglas de cuadros destacados","Ej: Cuadros de definición con borde izquierdo de 4pt en color del módulo, cuadros de importante con fondo amarillo claro y ícono de alerta, cuadros de ejemplo con borde redondeado...",kdata.reglasCuadros));
+    h+=kitCard("ti-brand-canva","#EEEDFE","#534AB7","Identidad y encabezado","<div class=\"kit-flbl\">Capturas del encabezado/pie de página correctos</div>"+kitImgBlock(id,"encabezado",kdata.encabezado)+kitArea(id,"reglasEncabezado","Reglas de encabezado y pie de página","Ej: Logo CFT en encabezado de primera página, pie de página con nombre de institución y número de página, membrete institucional en portada...",kdata.reglasEncabezado));
+    h+='</div>';
+  }
+  /* ── GENIALLY ── */
+  else if(id==="genially"){
+    h+='<div class="kit-grid">';
+    h+=kitCard("ti-palette","#FAEEDA","#BA7517","Colores institucionales",kitColors(id,kdata.colores||[])+kitArea(id,"notasColor","Reglas de uso de color","Ej: Botones de navegación en color del módulo, fondos claros, nunca más de 3 colores por pantalla...",kdata.notasColor));
+    h+=kitCard("ti-typography","#EEEDFE","#534AB7","Tipografía",kitField(id,"fuentePrincipal","Fuente principal","Ej: Montserrat",kdata.fuentePrincipal)+kitField(id,"fuenteSecundaria","Fuente de cuerpo","Ej: Open Sans",kdata.fuenteSecundaria)+kitArea(id,"reglasTypo","Jerarquía en pantalla","Ej: Títulos mínimo 24px, cuerpo mínimo 14px, nunca texto sobre imágenes sin fondo semitransparente...",kdata.reglasTypo));
+    h+=kitCard("ti-layout","#E6F1FB","#185FA5","Pantalla inicial y navegación","<div class=\"kit-flbl\">Capturas de la pantalla de inicio correcta</div>"+kitImgBlock(id,"pantallaInicio",kdata.pantallaInicio)+kitArea(id,"estructuraNav","Estructura y navegación","Ej: Pantalla inicial con título del recurso, botón de inicio visible, navegación con flechas o menú lateral, siempre indicar el avance al estudiante (ej: 3/8 pantallas)...",kdata.estructuraNav));
+    h+=kitCard("ti-hand-click","#E1F5EE","#085041","Interactividad y botones","<div class=\"kit-flbl\">Capturas de elementos interactivos correctos</div>"+kitImgBlock(id,"interactividad",kdata.interactividad)+kitArea(id,"reglasInteractividad","Reglas de interactividad","Ej: Todo botón debe tener estado hover visible, las instrucciones deben ser claras antes de cada actividad interactiva, retroalimentación inmediata en respuestas correctas e incorrectas...",kdata.reglasInteractividad));
+    h+=kitCard("ti-brush","#FBEAF0","#72243E","Ilustraciones y personajes","<div class=\"kit-flbl\">Ejemplos de ilustraciones correctas</div>"+kitImgBlock(id,"ilustraciones",kdata.ilustraciones)+kitArea(id,"criteriosIlustracion","Criterios visuales","Ej: Estilo flat, personaje del CFT presente en pantallas clave, ilustraciones alineadas con el contenido del módulo...",kdata.criteriosIlustracion));
+    h+=kitCard("ti-device-mobile","#F1EFE8","#444441","Responsividad y accesibilidad",kitArea(id,"reglasResponsivo","Reglas de responsividad","Ej: Verificar visualización en pantallas de mínimo 1024px, texto legible sin zoom, botones con área mínima de toque de 44px, probado en Chrome y Firefox...",kdata.reglasResponsivo)+kitArea(id,"reglasAccesibilidad","Reglas de accesibilidad","Ej: Contraste mínimo 4.5:1 para texto normal, no depender solo del color para transmitir información, todas las imágenes con texto alternativo...",kdata.reglasAccesibilidad));
+    h+=kitCard("ti-brand-canva","#EEEDFE","#534AB7","Identidad y logo","<div class=\"kit-flbl\">Capturas del logo correctamente integrado</div>"+kitImgBlock(id,"logoUso",kdata.logoUso)+kitArea(id,"reglasLogo","Posición y uso del logo","Ej: Logo CFT en pantalla inicial y final, tamaño proporcional al contenido, nunca sobre fondos que generen bajo contraste...",kdata.reglasLogo));
+    h+='</div>';
+  }
+  /* NOTAS GENERALES — igual para todos */
+  h+=kitCard("ti-notes","#F1EFE8","#444441","Criterios generales e instrucciones para la IA",'<div class="kit-flbl">Instrucciones adicionales que la IA debe considerar siempre al revisar este tipo de recurso</div><textarea class="kit-ftarea" style="min-height:90px;" placeholder="Ej: Siempre verificar que el recurso esté completo (no cortado), que el contenido sea coherente con el objetivo de aprendizaje de la semana, que no haya errores ortográficos visibles..." onchange="saveKitField(\''+id+'\',\'notas\',this.value)">'+(kdata.notas||"")+'</textarea>');
+  h+='<div style="display:flex;align-items:center;margin-top:.6rem;"><button class="kit-save-btn" onclick="guardarKit(\''+id+'\')"><i class="ti ti-device-floppy"></i> Guardar kit</button><span class="kit-status" id="kitstatus-'+id+'">✓ Guardado</span></div>';
+  return h;
+}
+
+function renderKit(){
+  var el=document.getElementById("content");
+  var html='<div class="page-title"><i class="ti ti-palette" style="color:var(--gr)"></i> Kit de marca por recurso</div>';
+  html+='<div class="page-sub">Define los elementos correctos para cada tipo de recurso. La IA usará todo esto como criterio al generar comentarios de revisión.</div>';
+  html+='<div class="kit-tabs">';
+  for(var i=0;i<KIT_RECURSOS.length;i++){
+    var kr=KIT_RECURSOS[i];
+    var kd=KIT[kr.id]||{};
+    var filled=((kd.colores&&kd.colores.length>0)||(kd.fuentePrincipal)||(kd.notas))?'<span style="width:6px;height:6px;border-radius:50%;background:var(--gr);display:inline-block;margin-left:4px;"></span>':"";
+    html+='<button class="kit-tab'+(ACTIVE_KIT===kr.id?" active":"")+'" onclick="setKitTab(\''+kr.id+'\')"><i class="ti '+kr.icon+'" style="font-size:13px"></i> '+kr.label+filled+'</button>';
+  }
+  html+='</div>';
+  for(var ki=0;ki<KIT_RECURSOS.length;ki++){
+    var kr2=KIT_RECURSOS[ki];
+    var kdata=KIT[kr2.id]||{colores:[],ilustraciones:[],iconos:[]};
+    html+='<div class="kit-section'+(ACTIVE_KIT===kr2.id?" active":"")+'" id="kitsec-'+kr2.id+'">';
+    html+=renderKitSeccion(kr2.id,kdata);
+    html+='</div>';
+  }
+  el.innerHTML=html;
+}
+
+function setKitTab(id){ACTIVE_KIT=id;renderKit();}
+function addColor(recursoId){
+  var pick=document.getElementById("colorpick-"+recursoId);
+  if(!pick)return;
+  var col=pick.value;
+  if(!KIT[recursoId])KIT[recursoId]={colores:[],tipografia:"",ilustraciones:[],iconos:[],notas:""};
+  if(!KIT[recursoId].colores)KIT[recursoId].colores=[];
+  KIT[recursoId].colores.push(col);
+  saveKit();renderKit();
+}
+function delColor(recursoId,idx){KIT[recursoId].colores.splice(idx,1);saveKit();renderKit();}
+function saveKitField(recursoId,field,val){if(!KIT[recursoId])KIT[recursoId]={};KIT[recursoId][field]=val;saveKit();}
+function addKitImg(recursoId,campo,input){
+  var files=input.files;if(!files||!files.length)return;
+  if(!KIT[recursoId])KIT[recursoId]={};
+  if(!KIT[recursoId][campo])KIT[recursoId][campo]=[];
+  var count=0;
+  function pf(file){
+    var r=new FileReader();
+    r.onload=function(e){
+      var img=new Image();
+      img.onload=function(){
+        var canvas=document.createElement("canvas");var MAX=800,w=img.width,h=img.height;
+        if(w>MAX){h=Math.round(h*(MAX/w));w=MAX;}if(h>MAX){w=Math.round(w*(MAX/h));h=MAX;}
+        canvas.width=w;canvas.height=h;canvas.getContext("2d").drawImage(img,0,0,w,h);
+        KIT[recursoId][campo].push(canvas.toDataURL("image/jpeg",0.8));
+        count++;if(count===files.length){saveKit();renderKit();}
+      };img.src=e.target.result;
+    };r.readAsDataURL(file);
+  }
+  for(var i=0;i<files.length;i++)pf(files[i]);
+}
+function delKitImg(recursoId,campo,idx){KIT[recursoId][campo].splice(idx,1);saveKit();renderKit();}
+function guardarKit(recursoId){saveKit();var st=document.getElementById("kitstatus-"+recursoId);if(st){st.style.display="inline";setTimeout(function(){st.style.display="none";},2500);}toast("Kit de marca guardado");}
+
+/* ── SYSTEM PROMPT CON KIT + REFS ── */
+function buildSystem(tipoRecurso){
+  var base="Eres el revisor de recursos educativos del CFT San Agustín. Redactas comentarios del checklist QA para la consultora eTiza.\n\nESTILO:\n- Guiones: \"- \" al inicio de cada observación\n- Videos: \"- Comentarios generales:\" luego \"- Slide X,\"\n- PDF: número de figura/tabla/página\n- Verbos: rehacer, sacar, agregar, reemplazar, corregir, revisar\n- Sin problemas: \"- SIN COMENTARIOS\"\n- Sin introducción ni cierre.\n\nCRITERIOS BASE:\nINFOGRAFÍA: Logo CFT, colores institucionales, tipografía, diseño infográfico no plano.\nPDF: Cuadros de texto sin formato, figuras copiadas del guión DI, títulos justificados, tablas sin formato.\nVIDEO: Comentarios generales, animaciones de salida, personaje centrado, slide final cortado.\nCUESTIONARIO: Visualización de casos, ponderación, retroalimentación.\nFORO: Claridad de consigna y criterios.\n\nCON IMAGEN: Analiza visualmente, sé ESPECÍFICO.";
+
+  /* Agregar kit de marca */
+  var kitId=tipoRecurso==="Infografía"?"infografia":tipoRecurso==="PDF"?"pdf":tipoRecurso==="Video / Interactivo"?"video":"genially";
+  var kdata=KIT[kitId];
+  var kitInfo="";
+  if(kdata){
+    if(kdata.colores&&kdata.colores.length>0)kitInfo+="\nColores institucionales: "+kdata.colores.join(", ");
+    if(kdata.notasColor)kitInfo+="\nUso de colores: "+kdata.notasColor;
+    if(kdata.fuentePrincipal)kitInfo+="\nFuente principal: "+kdata.fuentePrincipal;
+    if(kdata.fuenteSecundaria)kitInfo+="\nFuente secundaria: "+kdata.fuenteSecundaria;
+    if(kdata.reglasTypo)kitInfo+="\nReglas tipografía: "+kdata.reglasTypo;
+    /* Infografía */
+    if(kdata.estructuraLayout)kitInfo+="\nEstructura y layout: "+kdata.estructuraLayout;
+    if(kdata.criteriosIlustracion)kitInfo+="\nCriterios ilustración: "+kdata.criteriosIlustracion;
+    if(kdata.reglasIconos)kitInfo+="\nReglas iconos: "+kdata.reglasIconos;
+    if(kdata.reglasDecorativo)kitInfo+="\nElementos decorativos: "+kdata.reglasDecorativo;
+    /* Video */
+    if(kdata.estructuraSlides)kitInfo+="\nEstructura de slides: "+kdata.estructuraSlides;
+    if(kdata.animacionesEntrada)kitInfo+="\nAnimaciones de entrada: "+kdata.animacionesEntrada;
+    if(kdata.animacionesSalida)kitInfo+="\nAnimaciones de salida: "+kdata.animacionesSalida;
+    if(kdata.transiciones)kitInfo+="\nTransiciones entre slides: "+kdata.transiciones;
+    if(kdata.reglasPersonaje)kitInfo+="\nReglas del personaje/avatar: "+kdata.reglasPersonaje;
+    if(kdata.reglasAudio)kitInfo+="\nReglas de audio: "+kdata.reglasAudio;
+    if(kdata.reglasLocucion)kitInfo+="\nCriterios de locución: "+kdata.reglasLocucion;
+    if(kdata.reglasVideoBG)kitInfo+="\nVideos de fondo: "+kdata.reglasVideoBG;
+    if(kdata.reglasLogo)kitInfo+="\nUso del logo: "+kdata.reglasLogo;
+    /* PDF */
+    if(kdata.estructuraDoc)kitInfo+="\nEstructura del documento: "+kdata.estructuraDoc;
+    if(kdata.reglasTablad)kitInfo+="\nReglas de tablas: "+kdata.reglasTablad;
+    if(kdata.reglasFiguras)kitInfo+="\nReglas de figuras: "+kdata.reglasFiguras;
+    if(kdata.reglasCuadros)kitInfo+="\nCuadros de texto destacado: "+kdata.reglasCuadros;
+    if(kdata.reglasEncabezado)kitInfo+="\nEncabezado y pie de página: "+kdata.reglasEncabezado;
+    /* Genially */
+    if(kdata.estructuraNav)kitInfo+="\nEstructura y navegación: "+kdata.estructuraNav;
+    if(kdata.reglasInteractividad)kitInfo+="\nInteractividad y botones: "+kdata.reglasInteractividad;
+    if(kdata.reglasResponsivo)kitInfo+="\nResponsividad: "+kdata.reglasResponsivo;
+    if(kdata.reglasAccesibilidad)kitInfo+="\nAccesibilidad: "+kdata.reglasAccesibilidad;
+    /* Común */
+    if(kdata.notas)kitInfo+="\nCriterios adicionales: "+kdata.notas;
+  }
+  if(kitInfo)base+="\n\nKIT DE MARCA INSTITUCIONAL (aplica siempre al revisar):"+kitInfo;
+  base+="\n\nTIPOS DE MÓDULO Y COLORES INSTITUCIONALES:\n- Módulo Técnico: color #FC8B27 (naranja) — asignaturas específicas de la carrera\n- Módulo Transversal: color #8F8AF9 (morado) — Desarrollo Personal, Ética Personal, Formación para el Trabajo\n- Módulo Básico: color #AADBFC (celeste) — Matemáticas, Comunicación, Uso de Tecnologías de la Información\nCuando veas que un recurso usa un color que no corresponde al tipo de módulo indicado en el contexto, señálalo explícitamente.";
+
+  /* Agregar referencias */
+  var refId=tipoRecurso==="Infografía"?"imagen":tipoRecurso==="PDF"?"pdf":"video";
+  var refs=REFS[refId]||[];
+  var refInfo=refs.filter(function(r){return r.desc;}).map(function(r,i){return "Referencia "+(i+1)+": "+r.desc;}).join("\n");
+  if(refInfo)base+="\n\nREFERENCIAS DE CALIDAD (compara el recurso revisado contra estos estándares):\n"+refInfo;
+
+  return base;
+}
+
+function buildRefImgs(tipoRecurso){
+  var refId=tipoRecurso==="Infografía"?"imagen":tipoRecurso==="PDF"?"pdf":"video";
+  var refs=REFS[refId]||[];
+  var content=[];
+  for(var i=0;i<refs.length;i++){
+    if(!refs[i].b64||refs[i].isPdf)continue;
+    var b64=refs[i].b64.split(",")[1];
+    var mime=refs[i].b64.indexOf("image/png")>=0?"image/png":"image/jpeg";
+    content.push({type:"image",source:{type:"base64",media_type:mime,data:b64}});
+    content.push({type:"text",text:"[Referencia "+(i+1)+(refs[i].desc?" — "+refs[i].desc:"")+"]"});
+  }
+  /* Imágenes del kit */
+  var kitId=tipoRecurso==="Infografía"?"infografia":tipoRecurso==="PDF"?"pdf":tipoRecurso==="Video / Interactivo"?"video":"genially";
+  var kdata=KIT[kitId]||{};
+  var kitImgs=(kdata.ilustraciones||[]).concat(kdata.iconos||[]);
+  for(var j=0;j<kitImgs.length&&j<4;j++){
+    var b64k=kitImgs[j].split(",")[1];
+    content.push({type:"image",source:{type:"base64",media_type:"image/jpeg",data:b64k}});
+    content.push({type:"text",text:"[Elemento del kit de marca institucional]"});
+  }
+  return content;
+}
+
+/* ── MOODLE DATA ── */
+var MOODLE_DATA={};
+function mkMoodle(ky){return MOODLE_DATA[ky]||{};}
+function saveMoodle(ky,field,val){if(!MOODLE_DATA[ky])MOODLE_DATA[ky]={};MOODLE_DATA[ky][field]=val;try{localStorage.setItem("qa_moodle",JSON.stringify(MOODLE_DATA));}catch(e){}}
+function toggleMcheck(ky,field){if(!MOODLE_DATA[ky])MOODLE_DATA[ky]={};MOODLE_DATA[ky][field]=!MOODLE_DATA[ky][field];try{localStorage.setItem("qa_moodle",JSON.stringify(MOODLE_DATA));}catch(e){}renderContent();}
+var ACTIVE_MTAB={};
+
+function setMtab(ky,tab){ACTIVE_MTAB[ky]=tab;var tabs=document.querySelectorAll(".mtab[data-ky='"+ky+"']");var contents=document.querySelectorAll(".mtab-content[data-ky='"+ky+"']");tabs.forEach(function(t){t.classList.toggle("active",t.getAttribute("data-tab")===tab);});contents.forEach(function(c){c.classList.toggle("active",c.getAttribute("data-tab")===tab);});}
+
+function renderMoodleCuestionario(ky,md){
+  var tab=ACTIVE_MTAB[ky]||"config";
+  var h='<div class="moodle-panel">';
+  h+='<div style="padding:.6rem .85rem;background:var(--pul);border-bottom:1px solid var(--bor);display:flex;align-items:center;gap:6px;"><i class="ti ti-brand-moodle" style="font-size:14px;color:var(--pu)"></i><span style="font-size:12px;font-weight:600;color:var(--pu)">Configuración Moodle — Cuestionario</span></div>';
+  h+='<div class="moodle-tabs">';
+  h+='<button class="mtab'+(tab==="config"?" active":"")+'" data-ky="'+ky+'" data-tab="config" onclick="setMtab(\''+ky+'\',\'config\')"><i class="ti ti-settings" style="font-size:12px"></i> Configuración</button>';
+  h+='<button class="mtab'+(tab==="preguntas"?" active":"")+'" data-ky="'+ky+'" data-tab="preguntas" onclick="setMtab(\''+ky+'\',\'preguntas\')"><i class="ti ti-list-check" style="font-size:12px"></i> Preguntas</button>';
+  h+='<button class="mtab'+(tab==="feedback"?" active":"")+'" data-ky="'+ky+'" data-tab="feedback" onclick="setMtab(\''+ky+'\',\'feedback\')"><i class="ti ti-message-check" style="font-size:12px"></i> Retroalimentación</button>';
+  h+='</div>';
+  /* TAB CONFIG */
+  h+='<div class="mtab-content'+(tab==="config"?" active":"")+'" data-ky="'+ky+'" data-tab="config">';
+  h+='<div class="moodle-grid">';
+  h+='<div class="moodle-field"><div class="mfield-label">Ponderación / Nota máxima</div><input class="mfield-input" placeholder="Ej: 100" value="'+(md.ponderacion||"")+'" onchange="saveMoodle(\''+ky+'\',\'ponderacion\',this.value)"></div>';
+  h+='<div class="moodle-field"><div class="mfield-label">N° de intentos permitidos</div><input class="mfield-input" placeholder="Ej: 3" value="'+(md.intentos||"")+'" onchange="saveMoodle(\''+ky+'\',\'intentos\',this.value)"></div>';
+  h+='<div class="moodle-field"><div class="mfield-label">Tiempo límite</div><input class="mfield-input" placeholder="Ej: 60 minutos / Sin límite" value="'+(md.tiempo||"")+'" onchange="saveMoodle(\''+ky+'\',\'tiempo\',this.value)"></div>';
+  h+='<div class="moodle-field"><div class="mfield-label">Método de calificación</div><select class="mfield-select" onchange="saveMoodle(\''+ky+'\',\'metodo\',this.value)"><option value="">Selecciona...</option><option value="Nota más alta"'+(md.metodo==="Nota más alta"?" selected":"")+'>Nota más alta</option><option value="Promedio"'+(md.metodo==="Promedio"?" selected":"")+'>Promedio</option><option value="Primera"'+(md.metodo==="Primera"?" selected":"")+'>Primera</option><option value="Última"'+(md.metodo==="Última"?" selected":"")+'>Última</option></select></div>';
+  h+='<div class="moodle-field"><div class="mfield-label">Tipo de actividad</div><select class="mfield-select" onchange="saveMoodle(\''+ky+'\',\'tipoAct\',this.value)"><option value="">Selecciona...</option><option value="Formativa"'+(md.tipoAct==="Formativa"?" selected":"")+'>Formativa</option><option value="Sumativa"'+(md.tipoAct==="Sumativa"?" selected":"")+'>Sumativa</option><option value="Diagnóstica"'+(md.tipoAct==="Diagnóstica"?" selected":"")+'>Diagnóstica</option></select></div>';
+  h+='<div class="moodle-field"><div class="mfield-label">¿Baraja preguntas?</div><select class="mfield-select" onchange="saveMoodle(\''+ky+'\',\'baraja\',this.value)"><option value="">Selecciona...</option><option value="Sí"'+(md.baraja==="Sí"?" selected":"")+'>Sí</option><option value="No"'+(md.baraja==="No"?" selected":"")+'>No</option></select></div>';
+  h+='</div>';
+  h+='<div class="moodle-section-title">Verificaciones de configuración</div>';
+  h+='<div class="moodle-check-grid">';
+  var checks=[["visibilidad","✓ Visible para estudiantes"],["fechas","✓ Fechas de apertura/cierre correctas"],["pasaNota","✓ Pasa nota al libro de calificaciones"],["casos","✓ Se visualizan los casos correctamente"],["disponible","✓ Disponible en la semana correcta"]];
+  checks.forEach(function(c){var checked=!!(md[c[0]]);h+='<div class="mcheck'+(checked?" checked":"")+'" onclick="toggleMcheck(\''+ky+'\',\''+c[0]+'\')"><input type="checkbox"'+(checked?" checked":"")+' readonly> '+c[1]+'</div>';});
+  h+='</div>';
+  h+='<div class="moodle-field"><div class="mfield-label" style="margin-top:.5rem">Observaciones de configuración</div><textarea class="mfield-area" placeholder="Ej: La ponderación no coincide con el programa, falta configurar fecha de cierre..." onchange="saveMoodle(\''+ky+'\',\'obsConfig\',this.value)">'+(md.obsConfig||"")+'</textarea></div>';
+  h+='</div>';
+  /* TAB PREGUNTAS */
+  h+='<div class="mtab-content'+(tab==="preguntas"?" active":"")+'" data-ky="'+ky+'" data-tab="preguntas">';
+  h+='<div class="moodle-grid">';
+  h+='<div class="moodle-field"><div class="mfield-label">N° total de preguntas</div><input class="mfield-input" placeholder="Ej: 10" value="'+(md.numPreguntas||"")+'" onchange="saveMoodle(\''+ky+'\',\'numPreguntas\',this.value)"></div>';
+  h+='<div class="moodle-field"><div class="mfield-label">Tipos de pregunta usados</div><input class="mfield-input" placeholder="Ej: Selección múltiple, V/F" value="'+(md.tiposPreg||"")+'" onchange="saveMoodle(\''+ky+'\',\'tiposPreg\',this.value)"></div>';
+  h+='</div>';
+  h+='<div class="moodle-section-title">Verificaciones de preguntas</div>';
+  h+='<div class="moodle-check-grid">';
+  var checks2=[["pregClaras","✓ Preguntas redactadas con claridad"],["pregAlineadas","✓ Alineadas al objetivo de aprendizaje"],["sinAmbiguedad","✓ Sin doble negación ni ambigüedad"],["bancoBastante","✓ Banco con suficiente variedad"],["ortografia","✓ Sin errores ortográficos"],["pregNumero","✓ N° de preguntas correcto según programa"]];
+  checks2.forEach(function(c){var checked=!!(md[c[0]]);h+='<div class="mcheck'+(checked?" checked":"")+'" onclick="toggleMcheck(\''+ky+'\',\''+c[0]+'\')"><input type="checkbox"'+(checked?" checked":"")+' readonly> '+c[1]+'</div>';});
+  h+='</div>';
+  h+='<div class="moodle-field" style="margin-top:.5rem"><div class="mfield-label">Observaciones de preguntas</div><textarea class="mfield-area" placeholder="Ej: Pregunta 4 tiene doble negación, preguntas 6 y 7 no están alineadas al OA de la semana..." onchange="saveMoodle(\''+ky+'\',\'obsPreguntas\',this.value)">'+(md.obsPreguntas||"")+'</textarea></div>';
+  h+='</div>';
+  /* TAB FEEDBACK */
+  h+='<div class="mtab-content'+(tab==="feedback"?" active":"")+'" data-ky="'+ky+'" data-tab="feedback">';
+  h+='<div class="moodle-section-title">Verificaciones de retroalimentación</div>';
+  h+='<div class="moodle-check-grid">';
+  var checks3=[["feedbackConfig","✓ Retroalimentación configurada por pregunta"],["feedbackCorrect","✓ Feedback para respuesta correcta"],["feedbackIncorrect","✓ Feedback para respuesta incorrecta"],["feedbackExplica","✓ Explica por qué es correcta/incorrecta"],["feedbackLink","✓ Incluye referencia al material de estudio"],["feedbackActivo","✓ Se muestra al estudiante al terminar"]];
+  checks3.forEach(function(c){var checked=!!(md[c[0]]);h+='<div class="mcheck'+(checked?" checked":"")+'" onclick="toggleMcheck(\''+ky+'\',\''+c[0]+'\')"><input type="checkbox"'+(checked?" checked":"")+' readonly> '+c[1]+'</div>';});
+  h+='</div>';
+  h+='<div class="moodle-field" style="margin-top:.5rem"><div class="mfield-label">Observaciones de retroalimentación</div><textarea class="mfield-area" placeholder="Ej: Faltan 3 preguntas sin retroalimentación configurada, el feedback de la pregunta 2 no explica la respuesta..." onchange="saveMoodle(\''+ky+'\',\'obsFeedback\',this.value)">'+(md.obsFeedback||"")+'</textarea></div>';
+  h+='</div>';
+  h+='</div>';
+  return h;
+}
+
+function renderMoodleForo(ky,md){
+  var h='<div class="moodle-panel">';
+  h+='<div style="padding:.6rem .85rem;background:#EAF3DE;border-bottom:1px solid var(--bor);display:flex;align-items:center;gap:6px;"><i class="ti ti-messages" style="font-size:14px;color:#27500A"></i><span style="font-size:12px;font-weight:600;color:#27500A">Configuración Moodle — Foro</span></div>';
+  h+='<div style="padding:.85rem;">';
+  h+='<div class="moodle-grid">';
+  h+='<div class="moodle-field"><div class="mfield-label">Tipo de foro</div><select class="mfield-select" onchange="saveMoodle(\''+ky+'\',\'tipoForo\',this.value)"><option value="">Selecciona...</option><option value="Debate único"'+(md.tipoForo==="Debate único"?" selected":"")+'>Debate único</option><option value="Foro estándar"'+(md.tipoForo==="Foro estándar"?" selected":"")+'>Foro estándar</option><option value="Cada persona inicia un debate"'+(md.tipoForo==="Cada persona inicia un debate"?" selected":"")+'>Cada persona inicia un debate</option></select></div>';
+  h+='<div class="moodle-field"><div class="mfield-label">Ponderación / Calificación</div><input class="mfield-input" placeholder="Ej: 100 / Sin calificación" value="'+(md.ponderacion||"")+'" onchange="saveMoodle(\''+ky+'\',\'ponderacion\',this.value)"></div>';
+  h+='<div class="moodle-field"><div class="mfield-label">N° mínimo de respuestas</div><input class="mfield-input" placeholder="Ej: 1 publicación + 2 respuestas" value="'+(md.minRespuestas||"")+'" onchange="saveMoodle(\''+ky+'\',\'minRespuestas\',this.value)"></div>';
+  h+='<div class="moodle-field"><div class="mfield-label">Plazo de participación</div><input class="mfield-input" placeholder="Ej: Hasta el viernes 23:59" value="'+(md.plazo||"")+'" onchange="saveMoodle(\''+ky+'\',\'plazo\',this.value)"></div>';
+  h+='</div>';
+  h+='<div class="moodle-section-title">Verificaciones de consigna</div>';
+  h+='<div class="moodle-check-grid">';
+  var checks=[["consignaClaras","✓ Consigna clara y comprensible"],["consignaAlineada","✓ Alineada al contenido de la semana"],["consignaReflexion","✓ Invita a la reflexión personal"],["criteriosDefinidos","✓ Criterios de participación definidos"],["visible","✓ Visible y disponible para estudiantes"],["rublicaConfig","✓ Rúbrica de evaluación configurada"]];
+  checks.forEach(function(c){var checked=!!(md[c[0]]);h+='<div class="mcheck'+(checked?" checked":"")+'" onclick="toggleMcheck(\''+ky+'\',\''+c[0]+'\')"><input type="checkbox"'+(checked?" checked":"")+' readonly> '+c[1]+'</div>';});
+  h+='</div>';
+  h+='<div class="moodle-field" style="margin-top:.6rem"><div class="mfield-label">Texto de la consigna del foro</div><textarea class="mfield-area" style="min-height:64px" placeholder="Copia aquí la consigna del foro para que la IA la evalúe..." onchange="saveMoodle(\''+ky+'\',\'consignaTexto\',this.value)">'+(md.consignaTexto||"")+'</textarea></div>';
+  h+='<div class="moodle-field" style="margin-top:.5rem"><div class="mfield-label">Observaciones generales</div><textarea class="mfield-area" placeholder="Ej: La consigna es muy ambigua, no especifica cuántas respuestas debe dar el estudiante..." onchange="saveMoodle(\''+ky+'\',\'obsForo\',this.value)">'+(md.obsForo||"")+'</textarea></div>';
+  h+='</div></div>';
+  return h;
+}
+
+function buildMoodleContext(ky,tipo,md){
+  if(!md||Object.keys(md).length===0)return "";
+  var ctx="\n\nDATOS MOODLE (revisados directamente en la plataforma):\n";
+  if(tipo==="Cuestionario"){
+    if(md.ponderacion)ctx+="Ponderación: "+md.ponderacion+"\n";
+    if(md.intentos)ctx+="Intentos permitidos: "+md.intentos+"\n";
+    if(md.tiempo)ctx+="Tiempo límite: "+md.tiempo+"\n";
+    if(md.metodo)ctx+="Método de calificación: "+md.metodo+"\n";
+    if(md.tipoAct)ctx+="Tipo de actividad: "+md.tipoAct+"\n";
+    if(md.baraja)ctx+="Baraja preguntas: "+md.baraja+"\n";
+    if(md.numPreguntas)ctx+="N° de preguntas: "+md.numPreguntas+"\n";
+    if(md.tiposPreg)ctx+="Tipos de pregunta: "+md.tiposPreg+"\n";
+    var checks={visibilidad:"Visible para estudiantes",fechas:"Fechas OK",pasaNota:"Pasa nota",casos:"Visualiza casos",disponible:"Disponible en semana correcta",pregClaras:"Preguntas claras",pregAlineadas:"Alineadas al OA",sinAmbiguedad:"Sin ambigüedad",bancoBastante:"Banco suficiente",ortografia:"Sin errores ortográficos",pregNumero:"N° correcto",feedbackConfig:"Feedback configurado",feedbackCorrect:"Feedback correcto",feedbackIncorrect:"Feedback incorrecto",feedbackExplica:"Feedback explica",feedbackLink:"Feedback con referencia",feedbackActivo:"Feedback visible al alumno"};
+    var ok=[],nok=[];
+    Object.keys(checks).forEach(function(k){if(md[k])ok.push(checks[k]);else nok.push(checks[k]);});
+    if(nok.length>0)ctx+="Items NO cumplidos: "+nok.join(", ")+"\n";
+    if(ok.length>0)ctx+="Items cumplidos: "+ok.join(", ")+"\n";
+    if(md.obsConfig)ctx+="Obs. configuración: "+md.obsConfig+"\n";
+    if(md.obsPreguntas)ctx+="Obs. preguntas: "+md.obsPreguntas+"\n";
+    if(md.obsFeedback)ctx+="Obs. retroalimentación: "+md.obsFeedback+"\n";
+  }else if(tipo==="Foro"){
+    if(md.tipoForo)ctx+="Tipo de foro: "+md.tipoForo+"\n";
+    if(md.ponderacion)ctx+="Ponderación: "+md.ponderacion+"\n";
+    if(md.minRespuestas)ctx+="Mínimo de respuestas: "+md.minRespuestas+"\n";
+    if(md.plazo)ctx+="Plazo: "+md.plazo+"\n";
+    if(md.consignaTexto)ctx+="Texto de la consigna: \""+md.consignaTexto+"\"\n";
+    var fchecks={consignaClaras:"Consigna clara",consignaAlineada:"Alineada a la semana",consignaReflexion:"Invita a reflexión",criteriosDefinidos:"Criterios definidos",visible:"Visible",rublicaConfig:"Rúbrica configurada"};
+    var fnok=[];Object.keys(fchecks).forEach(function(k){if(!md[k])fnok.push(fchecks[k]);});
+    if(fnok.length>0)ctx+="Items NO cumplidos: "+fnok.join(", ")+"\n";
+    if(md.obsForo)ctx+="Observaciones: "+md.obsForo+"\n";
+  }
+  return ctx;
+}
+async function claudeCall(system,messages){
+  try{
+    var res=await fetch("/api/proxy",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:system,messages:messages})});
+    var txt=await res.text();
+    var d;try{d=JSON.parse(txt);}catch(e){throw new Error("El servidor devolvió HTML en vez de JSON. Código HTTP: "+res.status+". Respuesta: "+txt.substring(0,200));}
+    if(d.error)throw new Error(d.error.message||d.error.type||JSON.stringify(d.error));
+    var t=d.content&&d.content.find(function(c){return c.type==="text";});
+    if(!t)throw new Error("Respuesta vacía de Anthropic. Contenido: "+JSON.stringify(d).substring(0,200));
+    return t.text;
+  }catch(e){
+    throw new Error(e.message||"Error desconocido al conectar con el proxy");
+  }
+}
+
+/* ── NAV ── */
+function renderNav(){
+  var html="";
+  for(var i=0;i<CARRERAS.length;i++){
+    var c=CARRERAS[i];var a=ST.car===c.id;
+    html+='<button class="ncar'+(a?" active":"")+'" onclick="selCar(\''+c.id+'\')">';
+    html+='<span class="ndot" style="background:'+c.color+'"></span>'+c.short+'</button>';
+    if(a){html+='<div class="cg">';for(var j=1;j<=6;j++)html+='<button class="ncic'+(ST.cic===j?" active":"")+'" onclick="selCiclo('+j+')">Ciclo '+j+'</button>';html+='</div>';}
+  }
+  document.getElementById("nav").innerHTML=html;
+}
+function selCar(id){ST.car=id;ST.cic=null;ST.sem=null;ST.mod=null;renderNav();renderContent();}
+function selCiclo(n){ST.cic=n;ST.sem=null;ST.mod=null;renderNav();renderContent();}
+function renderChips(){
+  var v=0,m=0,r=0,p=0;
+  for(var ci=0;ci<CARRERAS.length;ci++){for(var j=1;j<=6;j++){var sts=ESTADOS[CARRERAS[ci].id][j]||[];for(var k2=0;k2<sts.length;k2++){if(sts[k2]==="Validado")v++;else if(sts[k2].indexOf("Modif")>=0)m++;else if(sts[k2].indexOf("revis")>=0)r++;else p++;}}}
+  document.getElementById("chips").innerHTML='<span class="chip cg2"><i class="ti ti-circle-check" style="font-size:11px"></i> '+v+' validados</span><span class="chip ca">'+m+' modif.</span><span class="chip cb">'+r+' revisión</span><span class="chip cgr">'+p+' producción</span>';
+}
+function sbClass(st){if(!st||st==="En producción")return "sp2";if(st==="Validado")return "sv";if(st.indexOf("Modif")>=0)return "sm";return "sr";}
+function semClass(car,cic,mod,sem){var recursos=getRecursosSem(sem);var ok=0,e2=0,w=0,tot=recursos.length;for(var i=0;i<tot;i++){var rv=ST.rev[rk(car,cic,mod,sem,recursos[i].id)];if(rv&&rv.estado==="ok")ok++;else if(rv&&rv.estado==="err")e2++;else if(rv&&rv.estado)w++;}if(ok===tot)return "ok";if(e2>0)return "err";if(w>0||ok>0)return "warn";return "";}
+
+function renderContent(){
+  if(TAB!=="revisar")return;
+  var el=document.getElementById("content");
+  if(!ST.car||!ST.cic){el.innerHTML='<div class="empty"><div class="eicon"><i class="ti ti-photo-scan"></i></div><h2>IA con visión de recursos</h2><p>Selecciona carrera y ciclo para comenzar.</p></div>';document.getElementById("tbtitle").textContent="Selecciona una carrera";return;}
+  var car=null;for(var i=0;i<CARRERAS.length;i++){if(CARRERAS[i].id===ST.car)car=CARRERAS[i];}
+  document.getElementById("tbtitle").textContent=car.name+" — Ciclo "+ST.cic;
+  var mods=MODULOS[ST.car][ST.cic]||[];var ests=ESTADOS[ST.car][ST.cic]||[];
+  var html='<div style="display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;">';
+  html+='<span style="font-size:11px;padding:3px 10px;border-radius:99px;background:#FC8B27;color:#4A1B0C;font-weight:600;"><i class="ti ti-circle" style="font-size:10px"></i> Técnico</span>';
+  html+='<span style="font-size:11px;padding:3px 10px;border-radius:99px;background:#8F8AF9;color:#26215C;font-weight:600;"><i class="ti ti-circle" style="font-size:10px"></i> Transversal</span>';
+  html+='<span style="font-size:11px;padding:3px 10px;border-radius:99px;background:#AADBFC;color:#0C447C;font-weight:600;"><i class="ti ti-circle" style="font-size:10px"></i> Básico</span>';
+  html+='</div>';
+  for(var mi=0;mi<mods.length;mi++){
+    var mod=mods[mi];var st=ests[mi]||"En producción";var mk=ST.car+"_"+ST.cic+"_"+mi;var open=ST.omods[mk];
+    var tm=tipoModulo(mod);
+    html+='<div class="mc"><div class="mh" onclick="toggleMod(\''+mk+'\','+mi+')">';
+    html+='<div class="mi" style="background:'+tm.color+';color:'+tm.texto+'"><i class="ti ti-book-2"></i></div>';
+    html+='<span class="mn">'+mod+'</span>';
+    html+='<span style="font-size:10px;padding:2px 8px;border-radius:99px;background:'+tm.color+';color:'+tm.texto+';font-weight:600;white-space:nowrap;margin-right:4px;">'+tm.label+'</span>';
+    html+='<span class="sbg '+sbClass(st)+'">'+st+'</span>';
+    html+='<i class="ti ti-chevron-down chv'+(open?" open":"")+'"></i></div>';
+    if(open){
+      html+='<div class="ss"><div class="slbl2">Semanas</div><div class="sgrid">';
+      /* Semana 0 */
+      var sc0=semClass(ST.car,ST.cic,mi,0);var sel0=(ST.sem===0&&ST.mod===mi);
+      html+='<button class="sbtn2'+(sc0?" "+sc0:"")+(sel0?" sel":"")+'" onclick="selSem('+mi+',0)" style="font-size:10px;padding:4px 2px;">S0<br><span style="font-size:9px;opacity:.7">Bienvenida</span></button>';
+      for(var s=1;s<=8;s++){var sc=semClass(ST.car,ST.cic,mi,s);var sel=(ST.sem===s&&ST.mod===mi);html+='<button class="sbtn2'+(sc?" "+sc:"")+(sel?" sel":"")+'" onclick="selSem('+mi+','+s+')">S'+s+'</button>';}
+      html+='</div></div>';
+      if(ST.mod===mi&&ST.sem!==null)html+=renderPanel(mi,ST.sem,mod,car.color);
+    }
+    html+='</div>';
+  }
+  el.innerHTML=html;
+}
+function toggleMod(mk,mi){ST.omods[mk]=!ST.omods[mk];if(!ST.omods[mk]){ST.sem=null;ST.mod=null;}renderContent();}
+function selSem(mi,s){ST.mod=mi;ST.sem=s;renderContent();}
+
+function renderPanel(mi,sem,modNombre,color){
+  var car=ST.car,cic=ST.cic;
+  var esS0=sem===0;
+  var recursosActivos=getRecursosSem(sem);
+  var gen=0,ap=0;
+  for(var i=0;i<recursosActivos.length;i++){var rv=ST.rev[rk(car,cic,mi,sem,recursosActivos[i].id)];if(rv&&rv.comentario)gen++;if(rv&&rv.estado==="ok")ap++;}
+  var totalRefs=REFS.imagen.length+REFS.pdf.length+REFS.video.length;
+  var kitCount=0;
+  for(var ki=0;ki<KIT_RECURSOS.length;ki++){var kd=KIT[KIT_RECURSOS[ki].id]||{};if((kd.colores&&kd.colores.length)||(kd.fuentePrincipal)||(kd.notas))kitCount++;}
+  var s0Banner=esS0?'<div style="background:#E6F1FB;border:1px solid #85B7EB;border-radius:8px;padding:.5rem .85rem;font-size:12px;color:#0C447C;margin-bottom:.75rem;display:flex;align-items:center;gap:6px;"><i class="ti ti-star"></i> Semana de bienvenida — Video de intro, Foro, Evaluación diagnóstica y Glosario</div>':sem===8?'<div style="background:#FBEAF0;border:1px solid #ED93B1;border-radius:8px;padding:.5rem .85rem;font-size:12px;color:#72243E;margin-bottom:.75rem;display:flex;align-items:center;gap:6px;"><i class="ti ti-school"></i> Semana de examen — Examen final y Examen final recuperativo</div>':"";
+  var html='<div class="rp"><div class="ph"><span class="ptitle"><i class="ti ti-clipboard-list" style="color:'+color+'"></i> '+(esS0?"Semana 0 — Bienvenida":"Semana "+sem+' — '+modNombre)+'</span>';
+  html+='<button class="biaall" id="biaall" onclick="generarTodos('+mi+','+sem+')"><i class="ti ti-sparkles"></i> Generar todos con IA<div class="iapb" id="iapb"></div></button></div>';
+  html+='<div style="display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:.75rem;">';
+  html+='<div class="tpill"><i class="ti ti-photo-scan" style="font-size:11px"></i> Análisis visual</div>';
+  if(totalRefs>0)html+='<div class="refpill"><i class="ti ti-books" style="font-size:11px"></i> '+totalRefs+' referencias</div>';
+  if(kitCount>0)html+='<div class="kitpill"><i class="ti ti-palette" style="font-size:11px"></i> Kit de marca activo</div>';
+  html+='</div>'+s0Banner;
+  if(gen>0)html+='<div style="background:var(--grl);border:1px solid #9FE1CB;border-radius:8px;padding:.5rem .85rem;font-size:12px;color:#085041;margin-bottom:.75rem;display:flex;align-items:center;gap:6px;"><i class="ti ti-check"></i> '+gen+'/'+recursosActivos.length+' comentarios — '+ap+' aprobados.</div>';
+  html+='<div class="rlist">';
+  for(var ri=0;ri<recursosActivos.length;ri++){
+    var r=recursosActivos[ri];var ky=rk(car,cic,mi,sem,r.id);var rv2=ST.rev[ky]||{};var recOpen=ST.orecs[ky];var hasImg=!!(ST.imgs[ky]);
+    var refId=r.tipo==="Infografía"?"imagen":r.tipo==="PDF"?"pdf":"video";var rc=(REFS[refId]||[]).length;
+    html+='<div class="ri" id="item-'+ky+'"><div class="rtop" onclick="toggleRec(\''+ky+'\')">';
+    html+='<span class="ttag '+r.tc+'">'+r.tipo+'</span><span class="rname">'+r.name+'</span>';
+    if(rc>0)html+='<span style="font-size:10px;padding:2px 7px;border-radius:99px;background:#FAEEDA;color:#633806;border:1px solid #EF9F27;white-space:nowrap;"><i class="ti ti-books" style="font-size:10px"></i> '+rc+'</span>';
+    html+='<span class="spill '+(hasImg?"sok":"sno")+'">'+(hasImg?'<i class="ti ti-photo-check" style="font-size:10px"></i> imagen':'sin imagen')+'</span>';
+    html+='<div class="ebs" onclick="event.stopPropagation()">';
+    html+='<button class="eb'+(rv2.estado==="ok"?" ok":"")+'" onclick="setEst(\''+ky+'\',\'ok\')"><i class="ti ti-check"></i></button>';
+    html+='<button class="eb'+(rv2.estado==="warn"?" warn":"")+'" onclick="setEst(\''+ky+'\',\'warn\')"><i class="ti ti-alert-triangle"></i></button>';
+    html+='<button class="eb'+(rv2.estado==="err"?" err":"")+'" onclick="setEst(\''+ky+'\',\'err\')"><i class="ti ti-x"></i></button>';
+    html+='</div><button class="xb" onclick="event.stopPropagation();toggleRec(\''+ky+'\')"><i class="ti ti-chevron-'+(recOpen?"up":"down")+'"></i></button></div>';
+    html+='<div class="rbody'+(recOpen?" open":"")+'">';
+    var md=mkMoodle(ky);
+    /* Moodle panel para Cuestionario y Foro */
+    if(r.tipo==="Cuestionario"){html+=renderMoodleCuestionario(ky,md);}
+    else if(r.tipo==="Foro"){html+=renderMoodleForo(ky,md);}
+    html+='<div style="margin-top:.75rem"></div>';
+    html+='<div class="uzone'+(hasImg?" has":"")+'" id="zone-'+ky+'"><input type="file" accept="image/*" onchange="loadImg(\''+ky+'\',this)">';
+    html+='<i class="ti ti-'+(hasImg?"photo-check":"photo-up")+'" style="font-size:22px;color:'+(hasImg?"var(--gr)":"var(--t3)")+'"></i>';
+    html+='<div style="font-size:12px;color:var(--t2);font-weight:500;margin-top:6px;">'+(hasImg?"Imagen cargada ✓ — clic para cambiar":"Arrastra o haz clic para subir captura")+'</div>';
+    html+='<div style="font-size:11px;color:var(--t3);margin-top:2px;">'+(hasImg?"La IA analizará esta imagen comparando con referencias y kit de marca":r.hint)+'</div>';
+    if(hasImg)html+='<img src="'+ST.imgs[ky]+'" class="uthumb">';
+    html+='</div>';
+    if(hasImg)html+='<button class="clrbtn" onclick="clearImg(\''+ky+'\')"><i class="ti ti-trash" style="font-size:11px"></i> Quitar imagen</button>';
+    html+='<button class="genbtn" id="genbtn-'+ky+'" data-ky="'+ky+'" data-ri="'+ri+'" data-mi="'+mi+'" data-sem="'+sem+'" onclick="generarUno(this)">';
+    html+='<i class="ti ti-sparkles"></i> '+(hasImg?"Analizar y generar comentario":"Generar comentario con IA");
+    html+='</button>';
+    html+='<div class="sbox" id="sbox-'+ky+'"></div>';
+    html+='<div class="clbl"><i class="ti ti-message" style="font-size:12px"></i> Comentario para checklist eTiza</div>';
+    html+='<textarea class="carea" id="txt-'+ky+'" onchange="saveC(\''+ky+'\',this.value)">'+(rv2.comentario||"")+'</textarea>';
+    html+='</div></div>';
+  }
+  html+='</div><div class="pacts">';
+  html+='<button class="bsec" onclick="exportarExcel()"><i class="ti ti-download"></i> Exportar Excel</button>';
+  html+='<button class="bpri" onclick="guardar('+mi+','+sem+')"><i class="ti ti-device-floppy"></i> Guardar semana</button>';
+  html+='</div></div>';
+  return html;
+}
+
+function toggleRec(ky){ST.orecs[ky]=!ST.orecs[ky];renderContent();}
+function loadImg(ky,input){
+  var file=input.files[0];if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var img=new Image();
+    img.onload=function(){
+      var canvas=document.createElement("canvas");var MAX=1400,w=img.width,h=img.height;
+      if(w>MAX){h=Math.round(h*(MAX/w));w=MAX;}if(h>MAX){w=Math.round(w*(MAX/h));h=MAX;}
+      canvas.width=w;canvas.height=h;canvas.getContext("2d").drawImage(img,0,0,w,h);
+      ST.imgs[ky]=canvas.toDataURL("image/jpeg",0.82);
+      renderContent();toast("Imagen cargada");
+    };img.src=e.target.result;
+  };reader.readAsDataURL(file);
+}
+function clearImg(ky){delete ST.imgs[ky];renderContent();}
+function setEst(ky,est){if(!ST.rev[ky])ST.rev[ky]={};ST.rev[ky].estado=ST.rev[ky].estado===est?null:est;saveRev();renderContent();}
+function saveC(ky,val){if(!ST.rev[ky])ST.rev[ky]={};ST.rev[ky].comentario=val;saveRev();}
+function guardar(mi,sem){var tas=document.querySelectorAll("[id^='txt-']");for(var i=0;i<tas.length;i++){var ky=tas[i].id.replace("txt-","");saveC(ky,tas[i].value);}saveRev();toast("Semana guardada");renderContent();}
+function setSbox(ky,type,msg){var el=document.getElementById("sbox-"+ky);if(!el)return;if(!type){el.className="sbox";el.innerHTML="";return;}el.className="sbox show "+type;el.innerHTML=msg;}
+
+async function generarUno(btn){
+  var ky=btn.getAttribute("data-ky");var ri=parseInt(btn.getAttribute("data-ri"));var mi=parseInt(btn.getAttribute("data-mi"));var sem=parseInt(btn.getAttribute("data-sem"));
+  btn.disabled=true;
+  var carObj=null;for(var i=0;i<CARRERAS.length;i++){if(CARRERAS[i].id===ST.car)carObj=CARRERAS[i];}
+  var mods=MODULOS[ST.car][ST.cic]||[];var modNombre=mods[mi]||"";
+  var esS0=sem===0;var recursosActivos=getRecursosSem(sem);
+  var r=recursosActivos[ri];if(!r){btn.disabled=false;return;}
+  var tm=tipoModulo(modNombre);
+  var semLabel=esS0?"Semana 0 (Bienvenida)":"Semana "+sem;
+  var moodleCtx=buildMoodleContext(ky,r.tipo,mkMoodle(ky));
+  var contexto="Recurso: "+r.name+" ("+r.tipo+")\nMódulo: "+modNombre+(esS0?" [Semana de Bienvenida]":" [Tipo: Módulo "+tm.label+"]")+"\nCarrera: "+(carObj?carObj.name:"")+", Ciclo "+ST.cic+", "+semLabel+moodleCtx;
+  var hasImg=!!(ST.imgs[ky]);var refImgs=buildRefImgs(r.tipo);var hasRefs=refImgs.length>0;
+  var system=buildSystem(r.tipo);var messages;
+  if(hasRefs&&hasImg){
+    setSbox(ky,"wk",'<span class="spin"><i class="ti ti-loader"></i></span> Analizando con referencias y kit de marca...');
+    var b64=ST.imgs[ky].split(",")[1];var mime=ST.imgs[ky].indexOf("image/png")>=0?"image/png":"image/jpeg";
+    var content=refImgs.slice();content.push({type:"text",text:"--- RECURSO A REVISAR ---"});
+    content.push({type:"image",source:{type:"base64",media_type:mime,data:b64}});
+    content.push({type:"text",text:"Compara este recurso con las referencias y el kit de marca. Genera el comentario QA.\n"+contexto});
+    messages=[{role:"user",content:content}];
+  }else if(hasImg){
+    setSbox(ky,"wk",'<span class="spin"><i class="ti ti-loader"></i></span> Analizando imagen...');
+    var b642=ST.imgs[ky].split(",")[1];var mime2=ST.imgs[ky].indexOf("image/png")>=0?"image/png":"image/jpeg";
+    messages=[{role:"user",content:[{type:"image",source:{type:"base64",media_type:mime2,data:b642}},{type:"text",text:"Analiza visualmente y genera el comentario QA.\n"+contexto}]}];
+  }else if(hasRefs){
+    setSbox(ky,"wk",'<span class="spin"><i class="ti ti-loader"></i></span> Generando con referencias...');
+    var content2=refImgs.slice();content2.push({type:"text",text:"Usando estas referencias como estándar, genera el comentario QA para:\n"+contexto});
+    messages=[{role:"user",content:content2}];
+  }else{
+    setSbox(ky,"wk",'<span class="spin"><i class="ti ti-loader"></i></span> Generando comentario...');
+    messages=[{role:"user",content:contexto+"\nGenera el comentario de revisión QA."}];
+  }
+  try{
+    var texto=await claudeCall(system,messages);
+    if(!ST.rev[ky])ST.rev[ky]={};
+    ST.rev[ky].comentario=texto;ST.rev[ky].estado=texto.indexOf("SIN COMENTARIOS")>=0?"ok":"warn";
+    saveRev();var txtEl=document.getElementById("txt-"+ky);if(txtEl)txtEl.value=texto;
+    setSbox(ky,"gd","<i class='ti ti-check'></i> Comentario generado correctamente");
+    setTimeout(function(){setSbox(ky,"","");},3500);
+  }catch(err){setSbox(ky,"bd","<i class='ti ti-alert-circle'></i> Error: "+err.message);}
+  btn.disabled=false;renderContent();
+}
+
+var genAllRunning=false;
+async function generarTodos(mi,sem){
+  if(genAllRunning)return;genAllRunning=true;
+  var recursosActivos=getRecursosSem(sem);
+  var btn=document.getElementById("biaall");
+  if(btn){btn.disabled=true;btn.innerHTML='<span class="spin"><i class="ti ti-loader"></i></span> Procesando... <div class="iapb" id="iapb"></div>';}
+  for(var i=0;i<recursosActivos.length;i++){
+    var ky=rk(ST.car,ST.cic,mi,sem,recursosActivos[i].id);ST.orecs[ky]=true;
+    var pb=document.getElementById("iapb");if(pb)pb.style.width=Math.round((i/recursosActivos.length)*100)+"%";
+    renderContent();
+    var b=document.getElementById("genbtn-"+ky);if(b)await generarUno(b);
+    await new Promise(function(res){setTimeout(res,500);});
+  }
+  var pb2=document.getElementById("iapb");if(pb2)pb2.style.width="100%";
+  genAllRunning=false;toast("Todos los comentarios generados");setTimeout(function(){renderContent();},300);
+}
+
+/* ── EXPORTAR EXCEL (sin librería externa) ── */
+function exportarExcel(){
+  /* Agrupar revisiones por carrera + ciclo + asignatura */
+  var hojas={};
+  var keys=Object.keys(ST.rev);
+  var totalRows=0;
+
+  for(var i=0;i<keys.length;i++){
+    var ky=keys[i];var rv=ST.rev[ky];
+    if(!rv||(!rv.estado&&!rv.comentario))continue;
+    var p=ky.split("_");
+    var carId=p[0],cic=parseInt(p[1]),modIdx=parseInt(p[2]),sem=parseInt(p[3]),recId=p[4];
+    var carObj=null;for(var j=0;j<CARRERAS.length;j++){if(CARRERAS[j].id===carId)carObj=CARRERAS[j];}
+    var modNom=(MODULOS[carId]&&MODULOS[carId][cic])?MODULOS[carId][cic][modIdx]:"";
+    var recsForSem=getRecursosSem(sem);
+    var recObj=null;for(var j2=0;j2<recsForSem.length;j2++){if(recsForSem[j2].id===recId)recObj=recsForSem[j2];}
+    var val=rv.estado==="ok"?"Validado":"No validado";
+    var carNom=carObj?carObj.name:"";
+
+    /* Clave de hoja: Ciclo N - NombreAsignatura (máx 28 chars para Excel) */
+    var hojaKey=carId+"_"+cic+"_"+modIdx;
+    var hojaLabel="Ciclo "+cic+" - "+modNom.substring(0,25);
+    if(!hojas[hojaKey]){
+      hojas[hojaKey]={
+        label:hojaLabel,
+        carNom:carNom,
+        modNom:modNom,
+        cic:cic,
+        rows:[]
+      };
+    }
+    hojas[hojaKey].rows.push([
+      carNom, cic+".0", modNom, sem+".0",
+      recObj?recObj.name:"", rv.comentario||"",
+      "No aplicados","",val
+    ]);
+    totalRows++;
+  }
+
+  if(totalRows===0){toast("No hay revisiones para exportar");return;}
+
+  /* Ordenar hojas por ciclo y luego por módulo */
+  var hojasOrdenadas=Object.keys(hojas).sort(function(a,b){
+    var ha=hojas[a],hb=hojas[b];
+    if(ha.cic!==hb.cic)return ha.cic-hb.cic;
+    return ha.modNom.localeCompare(hb.modNom);
+  });
+
+  /* Generar ZIP con un CSV por asignatura usando BlobWriter manual */
+  /* Como no tenemos xlsx disponible de forma fiable, generamos CSVs separados */
+  /* Si hay múltiples hojas, exportamos un CSV por hoja en archivos separados */
+  var cantHojas=hojasOrdenadas.length;
+
+  if(cantHojas===1){
+    /* Un solo CSV */
+    var hk=hojasOrdenadas[0];
+    var h=hojas[hk];
+    exportarCSV(h,hk);
+    toast("Checklist exportado — "+h.label);
+  } else {
+    /* Múltiples asignaturas — exportar una por una con delay */
+    toast("Exportando "+cantHojas+" archivos (uno por asignatura)...");
+    for(var hi=0;hi<hojasOrdenadas.length;hi++){
+      (function(idx){
+        setTimeout(function(){
+          var hk2=hojasOrdenadas[idx];
+          var h2=hojas[hk2];
+          exportarCSV(h2,hk2);
+        }, idx*600);
+      })(hi);
+    }
+  }
+}
+
+function exportarCSV(hoja,key){
+  var HEADER=["Nombre de la Carrera","Ciclo","Asignatura","Semana","Recurso","Observaciones CFT","Cambios aplicados eTiza","Plataforma","Validación CFT"];
+  /* Encabezado de 3 filas igual al formato real */
+  var meta=[
+    [hoja.carNom,"","","","","","","",""],
+    [hoja.modNom,"","","","","","","",""],
+    ["Módulo en sede online","Link","","","","","","",""],
+    HEADER
+  ];
+  /* Ordenar filas por semana y luego por orden de recurso */
+  hoja.rows.sort(function(a,b){
+    var sa=parseFloat(a[3]),sb=parseFloat(b[3]);
+    return sa-sb;
+  });
+  var allRows=meta.concat(hoja.rows);
+  var csv=allRows.map(function(row){
+    return row.map(function(cell){
+      var s=String(cell==null?"":cell).replace(/"/g,'""');
+      if(s.indexOf(",")>=0||s.indexOf("\n")>=0||s.indexOf('"')>=0)s='"'+s+'"';
+      return s;
+    }).join(",");
+  }).join("\r\n");
+
+  var BOM="\uFEFF";
+  var blob=new Blob([BOM+csv],{type:"text/csv;charset=utf-8;"});
+  var url=URL.createObjectURL(blob);
+  var a=document.createElement("a");
+  a.href=url;
+  /* Nombre de archivo: QA_Ciclo3_TICS_2025-05-10.csv */
+  var modShort=hoja.modNom.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]/g,"").replace(/\s+/g,"_").substring(0,30);
+  a.download="QA_Ciclo"+hoja.cic+"_"+modShort+"_"+new Date().toISOString().slice(0,10)+".csv";
+  document.body.appendChild(a);a.click();
+  setTimeout(function(){document.body.removeChild(a);URL.revokeObjectURL(url);},200);
+}
+
+var _tt=null;
+function toast(msg){var t=document.getElementById("toast");t.textContent=msg;t.style.display="block";clearTimeout(_tt);_tt=setTimeout(function(){t.style.display="none";},3500);}
+
+/* Exponer funciones globalmente para que funcionen los onclick en el HTML */
+
+window.testYEntrar=async function(){
+  var btn=document.getElementById("entrar");
+  if(btn){btn.disabled=true;btn.innerHTML='<span class="spin"><i class="ti ti-loader"></i></span> Verificando...';}
+  var el=document.getElementById("tres");
+  el.innerHTML='<span class="spin"><i class="ti ti-loader"></i></span> Probando conexión con el servidor...';
+  el.className="tres show chk";
+  try{
+    var res=await fetch("/api/proxy",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-haiku-4-5-20251001",max_tokens:10,messages:[{role:"user",content:"Di OK"}]})});
+    var d=await res.json();
+    if(d.error){el.innerHTML="Error: "+d.error.message;el.className="tres show err";if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-plug"></i> Verificar conexión e ingresar';}return;}
+    el.innerHTML="Conexión exitosa";el.className="tres show ok";
+    setTimeout(function(){
+      KEY="proxy";
+      document.getElementById("setup").style.display="none";
+      document.getElementById("app").style.display="block";
+      setTab("revisar");renderNav();renderChips();
+    },600);
+  }catch(e){
+    el.innerHTML="Error: No se encontró el proxy. Verifica que anthropic-proxy.php está en el servidor.";
+    el.className="tres show err";
+    if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-plug"></i> Verificar conexión e ingresar';}
+  }
+};
+window.setTab=setTab;window.selCar=selCar;window.selCiclo=selCiclo;
+window.toggleMod=toggleMod;window.selSem=selSem;window.toggleRec=toggleRec;
+window.setEst=setEst;window.saveC=saveC;window.guardar=guardar;
+window.loadImg=loadImg;window.clearImg=clearImg;
+window.generarUno=generarUno;window.generarTodos=generarTodos;
+window.exportarExcel=exportarExcel;window.exportarCSV=exportarCSV;window.toast=toast;
+window.addRef=addRef;window.delRef=delRef;window.saveRefDesc=saveRefDesc;
+window.setKitTab=setKitTab;window.addColor=addColor;window.delColor=delColor;
+window.saveKitField=saveKitField;window.addKitImg=addKitImg;window.delKitImg=delKitImg;
+window.guardarKit=guardarKit;window.setMtab=setMtab;window.toggleMcheck=toggleMcheck;
+window.setDashView=setDashView;window.irA=irA;window.setCarDetail=setCarDetail;window.sortDash=sortDash;window.setDashFilter=setDashFilter;window.clearDashFilters=clearDashFilters;
+</script>
+</body>
+</html>
