@@ -590,10 +590,6 @@ function renderDashboard(){
   if(DASH_VIEW==="carreras"){
     if(DASH_CAR_DETAIL){
       var car=CARRERAS.find(function(c){return c.id===DASH_CAR_DETAIL;});
-  /* ── VISTA POR CARRERA ── */
-  if(DASH_VIEW==="carreras"){
-    if(DASH_CAR_DETAIL){
-      var car=CARRERAS.find(function(c){return c.id===DASH_CAR_DETAIL;});
       html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">';
       html+='<button onclick="setCarDetail(null)" style="border:0.5px solid var(--bors);background:transparent;border-radius:7px;padding:5px 10px;cursor:pointer;font-size:12px;font-family:\'DM Sans\',sans-serif;color:var(--t2);display:flex;align-items:center;gap:5px;"><i class="ti ti-arrow-left" style="font-size:13px"></i> Volver</button>';
       html+='<div style="font-size:15px;font-weight:600;color:'+car.color+'"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+car.color+';margin-right:6px"></span>'+car.name+'</div>';
@@ -1302,7 +1298,6 @@ function saveC(ky,val){if(!ST.rev[ky])ST.rev[ky]={};ST.rev[ky].comentario=val;sa
 function guardar(mi,sem){var tas=document.querySelectorAll("[id^='txt-']");for(var i=0;i<tas.length;i++){var ky=tas[i].id.replace("txt-","");saveC(ky,tas[i].value);}saveRev();toast("Semana guardada");renderContent();}
 function setSbox(ky,type,msg){var el=document.getElementById("sbox-"+ky);if(!el)return;if(!type){el.className="sbox";el.innerHTML="";return;}el.className="sbox show "+type;el.innerHTML=msg;}
 
-async function generarUno(btn){
 async function generarUno(btn){
   var ky=btn.getAttribute("data-ky");var ri=parseInt(btn.getAttribute("data-ri"));var mi=parseInt(btn.getAttribute("data-mi"));var sem=parseInt(btn.getAttribute("data-sem"));
   btn.disabled=true;
