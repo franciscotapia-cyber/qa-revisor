@@ -1074,7 +1074,7 @@ function buildMoodleContext(ky,tipo,md){
 }
 async function claudeCall(system,messages){
   try{
-    var res=await fetch("/api/proxy",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:system,messages:messages})});
+    var res=await fetch("/api/proxy",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-3-5-sonnet-20240620",max_tokens:1000,system:system,messages:messages})});
     var txt=await res.text();
     var d;try{d=JSON.parse(txt);}catch(e){throw new Error("El servidor devolvió HTML en vez de JSON. Código HTTP: "+res.status+". Respuesta: "+txt.substring(0,200));}
     if(d.error)throw new Error(d.error.message||d.error.type||JSON.stringify(d.error));
