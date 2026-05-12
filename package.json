@@ -1,8 +1,5 @@
 {
-    "name": "qa-revisor",
-    "version": "1.0.0",
-    "private": true,
-    "dependencies": {
-          "@anthropic-ai/sdk": "^0.24.3"
-    }
+      "name": "qa-revisor",
+      "version": "1.0.0",
+      "private": true
 }
