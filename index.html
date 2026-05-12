@@ -345,7 +345,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);font-s
 </div>
 <div class="toast" id="toast"></div>
 
-<script type="module">
+<script>
 var CARRERAS=[{id:"emp",name:"Técnico en Gestión de Empresas",short:"Gestión de Empresas",color:"#534AB7"},{id:"cont",name:"Técnico en Gestión Contable",short:"Gestión Contable",color:"#1D9E75"},{id:"pub",name:"Técnico en Administración Pública",short:"Adm. Pública",color:"#185FA5"},{id:"log",name:"Técnico en Gestión Logística",short:"Gestión Logística",color:"#D85A30"}];
 var MODULOS={emp:{1:["Economía","Comunicación"],2:["Gestión del Capital Humano","Uso de tecnologías de la información"],3:["Matemáticas","Gestión Contable"],4:["Matemáticas Financiera","Desarrollo Personal"],5:["Tecnologías para el Trabajo","Administración Estratégica"],6:["Derecho Empresarial","Recursos Humanos"]},cont:{1:["Desarrollo Contable I","Matemáticas"],2:["Derecho Empresarial","Comunicación"],3:["Uso de Tecnología de la Información","Proceso Administrativo y Estratégico"],4:["Desarrollo Personal","Desarrollo Contable II"],5:["Remuneraciones y legislación laboral","Uso de Herramientas Estadísticas"],6:["Análisis de Costo y Presupuesto","Tecnologías para el trabajo"]},pub:{1:["Estructura y Funciones de la Administración Pública","Fundamentos de Economía"],2:["Normas Básicas del Derecho Administrativo chileno","Herramientas Tecnológicas I para la función pública"],3:["Desarrollo Personal","Bases Generales del Derecho"],4:["Herramientas Tecnológicas II para la función pública","Contabilidad"],5:["Contabilidad Pública","Práctica Intermedia"],6:["Ética Personal","Herramientas de Análisis para la gestión"]},log:{1:["Introducción a la logística","Matemáticas"],2:["Procesos Operativos en Logística","Desarrollo Personal"],3:["Uso de Tecnologías de la Información","Comunicación"],4:["Estándares de Seguridad en Logística","Gestión de Almacenamiento de Inventarios"],5:["Inglés Técnico","Matemáticas Financieras"],6:["Optimización de Operaciones Logísticas","Ética Personal"]}};
 var ESTADOS={emp:{1:["Validado","Validado"],2:["Modificaciones","Validado"],3:["Validado","En revisión"],4:["En producción","Validado"],5:["En producción","En producción"],6:["En producción","En producción"]},cont:{1:["Validado","Validado"],2:["Modificaciones","Validado"],3:["Validado","En revisión"],4:["Validado","En producción"],5:["En producción","En producción"],6:["En producción","En producción"]},pub:{1:["Modificaciones","Modificaciones"],2:["Modificaciones","Modificaciones"],3:["Validado","En revisión"],4:["En producción","En producción"],5:["En producción","En producción"],6:["En producción","En producción"]},log:{1:["Modificaciones","Validado"],2:["Modificaciones","Validado"],3:["Validado","Validado"],4:["En producción","En producción"],5:["En producción","En producción"],6:["En producción","En producción"]}};
@@ -741,6 +741,11 @@ function setDashView(view){DASH_VIEW=view;DASH_CAR_DETAIL=null;renderDashboard()
 function sortDash(view,col){var s=DASH_SORT[view];if(s.col===col){s.dir*=-1;}else{s.col=col;s.dir=1;}renderDashboard();}
 function setDashFilter(view,field,val){DASH_FILTER[view][field]=val;renderDashboard();}
 function clearDashFilters(view){Object.keys(DASH_FILTER[view]).forEach(function(k){DASH_FILTER[view][k]="";});renderDashboard();}
+
+function renderReferencias(){
+  var el=document.getElementById("content");
+  var html="";
+  html+='<div class="page-title"><i class="ti ti-books" style="color:var(--re)"></i> Banco de referencias</div>';
   html+='<div class="page-sub">Sube recursos modelo para cada tipo. La IA los usará como estándar de comparación al generar comentarios.</div>';
   html+='<div class="ref-banner"><div class="ref-banner-icon"><i class="ti ti-bulb"></i></div><div><div class="ref-banner-title">¿Cómo funciona?</div><div class="ref-banner-text">1. Sube imágenes o capturas de recursos bien hechos.<br>2. Describe qué hace bien ese recurso.<br>3. Al revisar, la IA compara el recurso actual contra estas referencias y señala diferencias.</div></div></div>';
   html+='<div class="ref-grid">';
@@ -1517,3 +1522,4 @@ window.setDashView=setDashView;window.irA=irA;window.setCarDetail=setCarDetail;w
 </script>
 </body>
 </html>
+
