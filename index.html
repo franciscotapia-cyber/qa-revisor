@@ -292,6 +292,31 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--t);font-s
 .mbadge-err{font-size:10px;padding:1px 7px;border-radius:99px;background:var(--rel);color:var(--re);border:1px solid #F09595;white-space:nowrap;}
 .moodle-section-title{font-size:11px;font-weight:600;color:var(--t2);text-transform:uppercase;letter-spacing:.04em;margin:.5rem 0 .4rem;}
 ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--bors);border-radius:99px;}
+
+/* ── DASHBOARD FILTERS ── */
+.dash-filters{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:1rem;padding:.6rem .85rem;background:var(--sur);border:1px solid var(--bor);border-radius:var(--r);}
+.dash-filter-lbl{font-size:11px;font-weight:500;color:var(--t3);margin-right:2px;}
+.dash-filter-sel{border:1px solid var(--bors);border-radius:6px;padding:4px 8px;font-size:12px;background:var(--bg);color:var(--t);font-family:'DM Sans',sans-serif;outline:none;cursor:pointer;min-width:100px;}
+.dash-filter-sel:focus{border-color:var(--pum);}
+.dash-clear-btn{font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid var(--bors);background:transparent;cursor:pointer;color:var(--t3);font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:4px;margin-left:auto;}
+.dash-clear-btn:hover{background:var(--rel);color:var(--re);border-color:#F09595;}
+.dash-ciclo-table th.sortable{cursor:pointer;user-select:none;position:relative;padding-right:18px;}
+.dash-ciclo-table th.sortable:hover{color:var(--pu);background:var(--pul);}
+.dash-ciclo-table th .sort-icon{font-size:10px;position:absolute;right:4px;top:50%;transform:translateY(-50%);opacity:.4;}
+.dash-ciclo-table th.sorted .sort-icon{opacity:1;color:var(--pu);}
+
+/* ── PDF UPLOAD ── */
+.uzone-pdf{border-color:var(--re);background:var(--rel);}
+.uzone-pdf.has{border-style:solid;border-color:var(--re);background:var(--rel);}
+.pdf-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 7px;border-radius:99px;background:var(--rel);color:var(--re);border:1px solid #F09595;white-space:nowrap;}
+
+/* ── LINK INPUT ── */
+.link-input-wrap{margin-top:.75rem;}
+.link-input-lbl{font-size:11px;font-weight:500;color:var(--t2);margin-bottom:4px;display:flex;align-items:center;gap:4px;}
+.link-input{width:100%;border:1px solid var(--bors);border-radius:7px;padding:7px 9px;font-size:12.5px;background:var(--sur);color:var(--t);font-family:'DM Mono',monospace;outline:none;}
+.link-input:focus{border-color:var(--pum);}
+.link-input.has{border-color:#5DCAA5;background:var(--grl);}
+.link-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;padding:2px 7px;border-radius:99px;background:var(--pul);color:var(--pu);border:1px solid var(--pum);white-space:nowrap;}
 </style>
 </head>
 <body>
@@ -365,7 +390,7 @@ var KIT_RECURSOS=[{id:"infografia",label:"Infografía",icon:"ti-photo",color:"#1
 var KEY="proxy",TAB="revisar";
 var CURRENT_USER={name:"Usuario",email:"qa@cftsa.cl",photo:null,profile:"revisor"};
 var SELECTED_PROFILE="revisor";
-var ST={car:null,cic:null,mod:null,sem:null,omods:{},orecs:{},rev:{},imgs:{}};
+var ST={car:null,cic:null,mod:null,sem:null,omods:{},orecs:{},rev:{},imgs:{},pdfs:{},links:{}};
 var REFS={imagen:[],pdf:[],video:[]};
 var KIT={
   infografia:{colores:["#1b7bb6","#0f4596","#b9d8f8","#FC8B27","#8F8AF9","#AADBFC"],ilustraciones:[],iconos:[],
@@ -387,6 +412,8 @@ function rk(a,b,c,d,e){return a+"_"+b+"_"+c+"_"+d+"_"+e;}
 function saveRev(){try{localStorage.setItem("qa_rev",JSON.stringify(ST.rev));}catch(e){}}
 function saveRefs(){try{localStorage.setItem("qa_refs",JSON.stringify(REFS));}catch(e){}}
 function saveKit(){try{localStorage.setItem("qa_kit",JSON.stringify(KIT));}catch(e){}}
+function savePdfs(){try{localStorage.setItem("qa_pdfs",JSON.stringify(ST.pdfs));}catch(e){}}
+function saveLinks(){try{localStorage.setItem("qa_links",JSON.stringify(ST.links));}catch(e){}}
 
 /* ── INICIALIZACIÓN ── */
 window.addEventListener("load",function(){
@@ -394,6 +421,8 @@ window.addEventListener("load",function(){
   try{var rf=localStorage.getItem("qa_refs");if(rf)REFS=JSON.parse(rf);}catch(e){}
   try{var kf=localStorage.getItem("qa_kit");if(kf)KIT=JSON.parse(kf);}catch(e){}
   try{var mf=localStorage.getItem("qa_moodle");if(mf)MOODLE_DATA=JSON.parse(mf);}catch(e){}
+  try{var pf=localStorage.getItem("qa_pdfs");if(pf)ST.pdfs=JSON.parse(pf);}catch(e){}
+  try{var lf=localStorage.getItem("qa_links");if(lf)ST.links=JSON.parse(lf);}catch(e){}
   /* Entrar directo sin login */
   document.getElementById("app").style.display="block";
   setTab("revisar");renderNav();renderChips();
@@ -561,11 +590,15 @@ function renderDashboard(){
   if(DASH_VIEW==="carreras"){
     if(DASH_CAR_DETAIL){
       var car=CARRERAS.find(function(c){return c.id===DASH_CAR_DETAIL;});
+  /* ── VISTA POR CARRERA ── */
+  if(DASH_VIEW==="carreras"){
+    if(DASH_CAR_DETAIL){
+      var car=CARRERAS.find(function(c){return c.id===DASH_CAR_DETAIL;});
       html+='<div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">';
       html+='<button onclick="setCarDetail(null)" style="border:0.5px solid var(--bors);background:transparent;border-radius:7px;padding:5px 10px;cursor:pointer;font-size:12px;font-family:\'DM Sans\',sans-serif;color:var(--t2);display:flex;align-items:center;gap:5px;"><i class="ti ti-arrow-left" style="font-size:13px"></i> Volver</button>';
       html+='<div style="font-size:15px;font-weight:600;color:'+car.color+'"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:'+car.color+';margin-right:6px"></span>'+car.name+'</div>';
       html+='</div>';
-      html+='<table class="dash-ciclo-table"><thead><tr><th>Ciclo</th><th>Módulo</th><th>Tipo</th><th>Avance</th><th>Dist.</th><th>✓ Ok</th><th>⚠ Corr.</th><th>✗ Rec.</th><th>⏳ Pend.</th><th></th></tr></thead><tbody>';
+      html+='<table class="dash-ciclo-table"><thead><tr><th>Ciclo</th><th>M'+String.fromCharCode(243)+'dulo</th><th>Tipo</th><th>Avance</th><th>Dist.</th><th>'+String.fromCharCode(10003)+' Ok</th><th>'+String.fromCharCode(9888)+' Corr.</th><th>'+String.fromCharCode(10007)+' Rec.</th><th>'+String.fromCharCode(9203)+' Pend.</th><th></th></tr></thead><tbody>';
       for(var cic2=1;cic2<=6;cic2++){
         var mods2=metricas[car.id].ciclos[cic2].mods;
         mods2.forEach(function(mod,mi){
@@ -582,13 +615,13 @@ function renderDashboard(){
           html+='<td style="color:#633806;font-weight:500">'+warn+'</td>';
           html+='<td style="color:var(--re);font-weight:500">'+err+'</td>';
           html+='<td style="color:var(--pu);font-weight:500">'+pend+'</td>';
-          html+='<td><button class="dash-go-btn" onclick="event.stopPropagation();irA(\''+car.id+'\','+cic2+')">Ir →</button></td>';
+          html+='<td><button class="dash-go-btn" onclick="event.stopPropagation();irA(\''+car.id+'\','+cic2+')">Ir '+String.fromCharCode(8594)+'</button></td>';
           html+='</tr>';
         });
       }
       html+='</tbody></table>';
     } else {
-      html+='<div style="font-size:12px;color:var(--t3);margin-bottom:.75rem;"><i class="ti ti-hand-click" style="font-size:12px"></i> Haz clic en una carrera para ver el detalle por ciclo y módulo</div>';
+      html+='<div style="font-size:12px;color:var(--t3);margin-bottom:.75rem;"><i class="ti ti-hand-click" style="font-size:12px"></i> Haz clic en una carrera para ver el detalle por ciclo y m'+String.fromCharCode(243)+'dulo</div>';
       html+='<div class="dash-car-grid">';
       CARRERAS.forEach(function(car){
         var c=calcCarrera(metricas,car.id);
@@ -615,61 +648,91 @@ function renderDashboard(){
 
   /* ── VISTA POR CICLO ── */
   else if(DASH_VIEW==="ciclos"){
+    var fc=DASH_FILTER.ciclos;var hasF=fc.carrera||fc.estado;
+    html+='<div class="dash-filters"><span class="dash-filter-lbl"><i class="ti ti-filter" style="font-size:12px"></i> Filtros:</span>';
+    html+='<select class="dash-filter-sel" onchange="setDashFilter(\'ciclos\',\'carrera\',this.value)"><option value="">Todas las carreras</option>';
+    CARRERAS.forEach(function(c2){html+='<option value="'+c2.id+'"'+(fc.carrera===c2.id?' selected':'')+'>'+c2.short+'</option>';});
+    html+='</select>';
+    html+='<select class="dash-filter-sel" onchange="setDashFilter(\'ciclos\',\'estado\',this.value)"><option value="">Todos los estados</option><option value="sin"'+(fc.estado==="sin"?' selected':'')+'>Sin iniciar</option><option value="prog"'+(fc.estado==="prog"?' selected':'')+'>En progreso</option><option value="comp"'+(fc.estado==="comp"?' selected':'')+'>Completo</option><option value="rech"'+(fc.estado==="rech"?' selected':'')+'>Con rechazos</option></select>';
+    if(hasF)html+='<button class="dash-clear-btn" onclick="clearDashFilters(\'ciclos\')"><i class="ti ti-x" style="font-size:11px"></i> Limpiar</button>';
+    html+='</div>';
+    var sc2=DASH_SORT.ciclos;function sIcon(col){return '<span class="sort-icon">'+(sc2.col===col?(sc2.dir===1?String.fromCharCode(9650):String.fromCharCode(9660)):String.fromCharCode(8693))+'</span>';}
     html+='<table class="dash-ciclo-table"><thead><tr>';
-    html+='<th>Carrera</th><th>Ciclo</th><th>Avance</th><th>Distribución</th><th>✓ Ok</th><th>⚠ Corr.</th><th>✗ Rec.</th><th>⏳ Pend.</th><th>Tiempo</th><th></th>';
+    html+='<th class="sortable'+(sc2.col==="carrera"?" sorted":"")+'" onclick="sortDash(\'ciclos\',\'carrera\')">Carrera'+sIcon("carrera")+'</th><th class="sortable'+(sc2.col==="ciclo"?" sorted":"")+'" onclick="sortDash(\'ciclos\',\'ciclo\')">Ciclo'+sIcon("ciclo")+'</th><th class="sortable'+(sc2.col==="avance"?" sorted":"")+'" onclick="sortDash(\'ciclos\',\'avance\')">Avance'+sIcon("avance")+'</th><th>Dist.</th><th>Ok</th><th>Corr.</th><th>Rec.</th><th>Pend.</th><th>Tiempo</th><th></th>';
     html+='</tr></thead><tbody>';
+    var cicloRows=[];
     CARRERAS.forEach(function(car){
       for(var cic=1;cic<=6;cic++){
-        var c=calcCiclo(metricas,car.id,cic);
-        var p=pct(c.ok+c.warn+c.err,c.tot);
-        var statusCls=p===100?"dsp-v":p===0?"dsp-p":c.err>0?"dsp-r":"dsp-c";
-        var statusTxt=p===100?"Completo":p===0?"Sin iniciar":c.err>0?"Con rechazos":"En progreso";
-        html+='<tr>';
-        html+='<td><span style="display:flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:'+car.color+';flex-shrink:0;display:inline-block"></span>'+car.short+'</span></td>';
-        html+='<td><strong>Ciclo '+cic+'</strong></td>';
-        html+='<td><span style="font-weight:600;color:'+(p===100?'var(--gr)':p>50?'var(--am)':'var(--re)')+'">'+p+'%</span></td>';
-        html+='<td>'+minBar(c.ok,c.warn,c.err,c.tot)+'</td>';
-        html+='<td style="color:#085041;font-weight:500">'+c.ok+'</td>';
-        html+='<td style="color:#633806;font-weight:500">'+c.warn+'</td>';
-        html+='<td style="color:var(--re);font-weight:500">'+c.err+'</td>';
-        html+='<td style="color:var(--pu);font-weight:500">'+c.pend+'</td>';
-        html+='<td style="color:var(--t3);font-size:11px;">'+( c.pend>0?tiempoEstimado(c.pend):"-")+'</td>';
-        html+='<td><button class="dash-go-btn" onclick="irA(\''+car.id+'\','+cic+')">Ir →</button></td>';
-        html+='</tr>';
+        var c=calcCiclo(metricas,car.id,cic);var p=pct(c.ok+c.warn+c.err,c.tot);
+        var estado=p===100?"comp":p===0?"sin":c.err>0?"rech":"prog";
+        if(fc.carrera&&fc.carrera!==car.id)continue;
+        if(fc.estado&&fc.estado!==estado)continue;
+        cicloRows.push({car:car,cic:cic,c:c,p:p,estado:estado});
       }
+    });
+    cicloRows.sort(function(a,b){if(sc2.col==="carrera")return sc2.dir*(a.car.short.localeCompare(b.car.short));if(sc2.col==="ciclo")return sc2.dir*(a.cic-b.cic);if(sc2.col==="avance")return sc2.dir*(a.p-b.p);return 0;});
+    cicloRows.forEach(function(row){
+      html+='<tr>';
+      html+='<td><span style="display:flex;align-items:center;gap:5px;"><span style="width:8px;height:8px;border-radius:50%;background:'+row.car.color+';flex-shrink:0;display:inline-block"></span>'+row.car.short+'</span></td>';
+      html+='<td><strong>Ciclo '+row.cic+'</strong></td>';
+      html+='<td><span style="font-weight:600;color:'+(row.p===100?'var(--gr)':row.p>50?'var(--am)':'var(--re)')+'">'+row.p+'%</span></td>';
+      html+='<td>'+minBar(row.c.ok,row.c.warn,row.c.err,row.c.tot)+'</td>';
+      html+='<td style="color:#085041;font-weight:500">'+row.c.ok+'</td>';
+      html+='<td style="color:#633806;font-weight:500">'+row.c.warn+'</td>';
+      html+='<td style="color:var(--re);font-weight:500">'+row.c.err+'</td>';
+      html+='<td style="color:var(--pu);font-weight:500">'+row.c.pend+'</td>';
+      html+='<td style="color:var(--t3);font-size:11px;">'+( row.c.pend>0?tiempoEstimado(row.c.pend):"-")+'</td>';
+      html+='<td><button class="dash-go-btn" onclick="irA(\''+row.car.id+'\','+row.cic+')">Ir '+String.fromCharCode(8594)+'</button></td>';
+      html+='</tr>';
     });
     html+='</tbody></table>';
   }
 
-  /* ── VISTA POR MÓDULO ── */
+  /* ── VISTA POR M'+String.fromCharCode(211)+'DULO ── */
   else if(DASH_VIEW==="modulos"){
+    var fm=DASH_FILTER.modulos;var hasF2=fm.carrera||fm.tipo||fm.estado;
+    html+='<div class="dash-filters"><span class="dash-filter-lbl"><i class="ti ti-filter" style="font-size:12px"></i> Filtros:</span>';
+    html+='<select class="dash-filter-sel" onchange="setDashFilter(\'modulos\',\'carrera\',this.value)"><option value="">Todas las carreras</option>';
+    CARRERAS.forEach(function(c2){html+='<option value="'+c2.id+'"'+(fm.carrera===c2.id?' selected':'')+'>'+c2.short+'</option>';});
+    html+='</select>';
+    html+='<select class="dash-filter-sel" onchange="setDashFilter(\'modulos\',\'tipo\',this.value)"><option value="">Todos los tipos</option><option value="T'+String.fromCharCode(233)+'cnico"'+(fm.tipo==="T'+String.fromCharCode(233)+'cnico"?' selected':'')+'>T'+String.fromCharCode(233)+'cnico</option><option value="Transversal"'+(fm.tipo==="Transversal"?' selected':'')+'>Transversal</option><option value="B'+String.fromCharCode(225)+'sico"'+(fm.tipo==="B'+String.fromCharCode(225)+'sico"?' selected':'')+'>B'+String.fromCharCode(225)+'sico</option></select>';
+    html+='<select class="dash-filter-sel" onchange="setDashFilter(\'modulos\',\'estado\',this.value)"><option value="">Todos los estados</option><option value="sin"'+(fm.estado==="sin"?' selected':'')+'>Sin iniciar</option><option value="prog"'+(fm.estado==="prog"?' selected':'')+'>En progreso</option><option value="comp"'+(fm.estado==="comp"?' selected':'')+'>Completo</option></select>';
+    if(hasF2)html+='<button class="dash-clear-btn" onclick="clearDashFilters(\'modulos\')"><i class="ti ti-x" style="font-size:11px"></i> Limpiar</button>';
+    html+='</div>';
+    var sm2=DASH_SORT.modulos;function sIcon2(col){return '<span class="sort-icon">'+(sm2.col===col?(sm2.dir===1?String.fromCharCode(9650):String.fromCharCode(9660)):String.fromCharCode(8693))+'</span>';}
     html+='<table class="dash-ciclo-table"><thead><tr>';
-    html+='<th>Módulo</th><th>Tipo</th><th>Carrera</th><th>Ciclo</th><th>Avance</th><th>Ok</th><th>Corr.</th><th>Rec.</th><th>Pend.</th><th></th>';
+    html+='<th class="sortable'+(sm2.col==="modulo"?" sorted":"")+'" onclick="sortDash(\'modulos\',\'modulo\')">M'+String.fromCharCode(243)+'dulo'+sIcon2("modulo")+'</th><th>Tipo</th><th class="sortable'+(sm2.col==="carrera"?" sorted":"")+'" onclick="sortDash(\'modulos\',\'carrera\')">Carrera'+sIcon2("carrera")+'</th><th>Ciclo</th><th class="sortable'+(sm2.col==="avance"?" sorted":"")+'" onclick="sortDash(\'modulos\',\'avance\')">Avance'+sIcon2("avance")+'</th><th>Ok</th><th>Corr.</th><th>Rec.</th><th>Pend.</th><th></th>';
     html+='</tr></thead><tbody>';
+    var modRows=[];
     CARRERAS.forEach(function(car){
       for(var cic=1;cic<=6;cic++){
         var mods=metricas[car.id].ciclos[cic].mods;
         mods.forEach(function(mod,mi){
           var tot=0,ok=0,warn=0,err=0,pend=0;
-          [0,1,2,3,4,5,6,7,8].forEach(function(sem){
-            var s=mod.semanas[sem];tot+=s.total;ok+=s.ok;warn+=s.warn;err+=s.err;pend+=s.pendiente;
-          });
-          var p=pct(ok+warn+err,tot);
-          var tm=mod.tipo;
-          html+='<tr>';
-          html+='<td style="font-weight:500;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+mod.name+'">'+mod.name+'</td>';
-          html+='<td><span class="dash-status-pill" style="background:'+tm.color+';color:'+tm.texto+';">'+tm.label+'</span></td>';
-          html+='<td style="font-size:11px;color:var(--t2)">'+car.short+'</td>';
-          html+='<td style="font-size:11px;color:var(--t2)">C'+cic+'</td>';
-          html+='<td>'+minBar(ok,warn,err,tot)+'<span style="font-size:10px;color:var(--t3);margin-left:4px">'+p+'%</span></td>';
-          html+='<td style="color:#085041;font-weight:500;font-size:12px">'+ok+'</td>';
-          html+='<td style="color:#633806;font-weight:500;font-size:12px">'+warn+'</td>';
-          html+='<td style="color:var(--re);font-weight:500;font-size:12px">'+err+'</td>';
-          html+='<td style="color:var(--pu);font-weight:500;font-size:12px">'+pend+'</td>';
-          html+='<td><button class="dash-go-btn" onclick="irA(\''+car.id+'\','+cic+')">Ir →</button></td>';
-          html+='</tr>';
+          [0,1,2,3,4,5,6,7,8].forEach(function(sem){var s=mod.semanas[sem];tot+=s.total;ok+=s.ok;warn+=s.warn;err+=s.err;pend+=s.pendiente;});
+          var p=pct(ok+warn+err,tot);var tm=mod.tipo;
+          var estado=p===100?"comp":p===0?"sin":"prog";
+          if(fm.carrera&&fm.carrera!==car.id)return;
+          if(fm.tipo&&fm.tipo!==tm.label)return;
+          if(fm.estado&&fm.estado!==estado)return;
+          modRows.push({name:mod.name,tipo:tm,car:car,cic:cic,p:p,ok:ok,warn:warn,err:err,pend:pend,tot:tot});
         });
       }
+    });
+    modRows.sort(function(a,b){if(sm2.col==="modulo")return sm2.dir*(a.name.localeCompare(b.name));if(sm2.col==="carrera")return sm2.dir*(a.car.short.localeCompare(b.car.short));if(sm2.col==="avance")return sm2.dir*(a.p-b.p);return 0;});
+    modRows.forEach(function(row){
+      html+='<tr>';
+      html+='<td style="font-weight:500;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="'+row.name+'">'+row.name+'</td>';
+      html+='<td><span class="dash-status-pill" style="background:'+row.tipo.color+';color:'+row.tipo.texto+';">'+row.tipo.label+'</span></td>';
+      html+='<td style="font-size:11px;color:var(--t2)">'+row.car.short+'</td>';
+      html+='<td style="font-size:11px;color:var(--t2)">C'+row.cic+'</td>';
+      html+='<td>'+minBar(row.ok,row.warn,row.err,row.tot)+'<span style="font-size:10px;color:var(--t3);margin-left:4px">'+row.p+'%</span></td>';
+      html+='<td style="color:#085041;font-weight:500;font-size:12px">'+row.ok+'</td>';
+      html+='<td style="color:#633806;font-weight:500;font-size:12px">'+row.warn+'</td>';
+      html+='<td style="color:var(--re);font-weight:500;font-size:12px">'+row.err+'</td>';
+      html+='<td style="color:var(--pu);font-weight:500;font-size:12px">'+row.pend+'</td>';
+      html+='<td><button class="dash-go-btn" onclick="irA(\''+row.car.id+'\','+row.cic+')">Ir '+String.fromCharCode(8594)+'</button></td>';
+      html+='</tr>';
     });
     html+='</tbody></table>';
   }
@@ -682,15 +745,6 @@ function setDashView(view){DASH_VIEW=view;DASH_CAR_DETAIL=null;renderDashboard()
 function sortDash(view,col){var s=DASH_SORT[view];if(s.col===col){s.dir*=-1;}else{s.col=col;s.dir=1;}renderDashboard();}
 function setDashFilter(view,field,val){DASH_FILTER[view][field]=val;renderDashboard();}
 function clearDashFilters(view){Object.keys(DASH_FILTER[view]).forEach(function(k){DASH_FILTER[view][k]="";});renderDashboard();}
-function irA(carId,cic){
-  ST.car=carId;ST.cic=cic;ST.sem=null;ST.mod=null;
-  setTab("revisar");renderNav();renderContent();
-}
-
-/* ── REFERENCIAS ── */
-function renderReferencias(){
-  var el=document.getElementById("content");
-  var html='<div class="page-title"><i class="ti ti-books" style="color:var(--am)"></i> Banco de referencias</div>';
   html+='<div class="page-sub">Sube recursos modelo para cada tipo. La IA los usará como estándar de comparación al generar comentarios.</div>';
   html+='<div class="ref-banner"><div class="ref-banner-icon"><i class="ti ti-bulb"></i></div><div><div class="ref-banner-title">¿Cómo funciona?</div><div class="ref-banner-text">1. Sube imágenes o capturas de recursos bien hechos.<br>2. Describe qué hace bien ese recurso.<br>3. Al revisar, la IA compara el recurso actual contra estas referencias y señala diferencias.</div></div></div>';
   html+='<div class="ref-grid">';
@@ -1164,12 +1218,16 @@ function renderPanel(mi,sem,modNombre,color){
   if(gen>0)html+='<div style="background:var(--grl);border:1px solid #9FE1CB;border-radius:8px;padding:.5rem .85rem;font-size:12px;color:#085041;margin-bottom:.75rem;display:flex;align-items:center;gap:6px;"><i class="ti ti-check"></i> '+gen+'/'+recursosActivos.length+' comentarios — '+ap+' aprobados.</div>';
   html+='<div class="rlist">';
   for(var ri=0;ri<recursosActivos.length;ri++){
-    var r=recursosActivos[ri];var ky=rk(car,cic,mi,sem,r.id);var rv2=ST.rev[ky]||{};var recOpen=ST.orecs[ky];var hasImg=!!(ST.imgs[ky]);
-    var refId=r.tipo==="Infografía"?"imagen":r.tipo==="PDF"?"pdf":"video";var rc=(REFS[refId]||[]).length;
+  for(var ri=0;ri<recursosActivos.length;ri++){
+    var r=recursosActivos[ri];var ky=rk(car,cic,mi,sem,r.id);var rv2=ST.rev[ky]||{};var recOpen=ST.orecs[ky];var hasImg=!!(ST.imgs[ky]);var hasPdf=!!(ST.pdfs[ky]);var hasLink=!!(ST.links[ky]);
+    var refId=r.tipo==="Infograf"+String.fromCharCode(237)+"a"?"imagen":r.tipo==="PDF"?"pdf":"video";var rc=(REFS[refId]||[]).length;
+    var esVideoInter=r.tipo==="Video / Interactivo";
     html+='<div class="ri" id="item-'+ky+'"><div class="rtop" onclick="toggleRec(\''+ky+'\')">';
     html+='<span class="ttag '+r.tc+'">'+r.tipo+'</span><span class="rname">'+r.name+'</span>';
     if(rc>0)html+='<span style="font-size:10px;padding:2px 7px;border-radius:99px;background:#FAEEDA;color:#633806;border:1px solid #EF9F27;white-space:nowrap;"><i class="ti ti-books" style="font-size:10px"></i> '+rc+'</span>';
-    html+='<span class="spill '+(hasImg?"sok":"sno")+'">'+(hasImg?'<i class="ti ti-photo-check" style="font-size:10px"></i> imagen':'sin imagen')+'</span>';
+    if(hasPdf)html+='<span class="pdf-badge"><i class="ti ti-file-type-pdf" style="font-size:10px"></i> PDF</span>';
+    if(hasLink)html+='<span class="link-badge"><i class="ti ti-link" style="font-size:10px"></i> URL</span>';
+    html+='<span class="spill '+(hasImg||hasPdf?"sok":"sno")+'">'+(hasImg?'<i class="ti ti-photo-check" style="font-size:10px"></i> imagen':hasPdf?'<i class="ti ti-file-check" style="font-size:10px"></i> PDF':'sin archivo')+'</span>';
     html+='<div class="ebs" onclick="event.stopPropagation()">';
     html+='<button class="eb'+(rv2.estado==="ok"?" ok":"")+'" onclick="setEst(\''+ky+'\',\'ok\')"><i class="ti ti-check"></i></button>';
     html+='<button class="eb'+(rv2.estado==="warn"?" warn":"")+'" onclick="setEst(\''+ky+'\',\'warn\')"><i class="ti ti-alert-triangle"></i></button>';
@@ -1177,25 +1235,27 @@ function renderPanel(mi,sem,modNombre,color){
     html+='</div><button class="xb" onclick="event.stopPropagation();toggleRec(\''+ky+'\')"><i class="ti ti-chevron-'+(recOpen?"up":"down")+'"></i></button></div>';
     html+='<div class="rbody'+(recOpen?" open":"")+'">';
     var md=mkMoodle(ky);
-    /* Moodle panel para Cuestionario y Foro */
     if(r.tipo==="Cuestionario"){html+=renderMoodleCuestionario(ky,md);}
     else if(r.tipo==="Foro"){html+=renderMoodleForo(ky,md);}
     html+='<div style="margin-top:.75rem"></div>';
-    html+='<div class="uzone'+(hasImg?" has":"")+'" id="zone-'+ky+'"><input type="file" accept="image/*" onchange="loadImg(\''+ky+'\',this)">';
-    html+='<i class="ti ti-'+(hasImg?"photo-check":"photo-up")+'" style="font-size:22px;color:'+(hasImg?"var(--gr)":"var(--t3)")+'"></i>';
-    html+='<div style="font-size:12px;color:var(--t2);font-weight:500;margin-top:6px;">'+(hasImg?"Imagen cargada ✓ — clic para cambiar":"Arrastra o haz clic para subir captura")+'</div>';
-    html+='<div style="font-size:11px;color:var(--t3);margin-top:2px;">'+(hasImg?"La IA analizará esta imagen comparando con referencias y kit de marca":r.hint)+'</div>';
-    if(hasImg)html+='<img src="'+ST.imgs[ky]+'" class="uthumb">';
+    html+='<div class="uzone'+(hasImg?" has":hasPdf?" uzone-pdf has":"")+'" id="zone-'+ky+'"><input type="file" accept="image/*,application/pdf" onchange="loadFile(\''+ky+'\',this)">';
+    if(hasPdf){html+='<i class="ti ti-file-type-pdf" style="font-size:22px;color:var(--re)"></i><div style="font-size:12px;color:var(--re);font-weight:500;margin-top:6px;">PDF cargado '+String.fromCharCode(10003)+'</div><div style="font-size:11px;color:var(--t3);margin-top:2px;">'+ST.pdfs[ky].name+' ('+ST.pdfs[ky].size+')</div>';}
+    else{html+='<i class="ti ti-'+(hasImg?"photo-check":"cloud-upload")+'" style="font-size:22px;color:'+(hasImg?"var(--gr)":"var(--t3)")+'"></i><div style="font-size:12px;color:var(--t2);font-weight:500;margin-top:6px;">'+(hasImg?"Imagen cargada '+String.fromCharCode(10003)+'":"Arrastra o haz clic para subir captura o PDF")+'</div><div style="font-size:11px;color:var(--t3);margin-top:2px;">'+(hasImg?"La IA analizar"+String.fromCharCode(225)+" esta imagen":"PNG, JPG o PDF")+'</div>';if(hasImg)html+='<img src="'+ST.imgs[ky]+'" class="uthumb">';}
     html+='</div>';
     if(hasImg)html+='<button class="clrbtn" onclick="clearImg(\''+ky+'\')"><i class="ti ti-trash" style="font-size:11px"></i> Quitar imagen</button>';
+    if(hasPdf)html+='<button class="clrbtn" onclick="clearPdf(\''+ky+'\')"><i class="ti ti-trash" style="font-size:11px"></i> Quitar PDF</button>';
+    if(esVideoInter){
+      html+='<div class="link-input-wrap"><div class="link-input-lbl"><i class="ti ti-link" style="font-size:12px"></i> URL del recurso (Genially, video, interactivo)</div>';
+      html+='<input class="link-input'+(hasLink?" has":"")+'" type="url" placeholder="https://view.genially.com/... o URL del video" value="'+(ST.links[ky]||'')+'" onchange="saveLink(\''+ky+'\',this.value)" onblur="saveLink(\''+ky+'\',this.value)">';
+      html+='</div>';
+    }
     html+='<button class="genbtn" id="genbtn-'+ky+'" data-ky="'+ky+'" data-ri="'+ri+'" data-mi="'+mi+'" data-sem="'+sem+'" onclick="generarUno(this)">';
-    html+='<i class="ti ti-sparkles"></i> '+(hasImg?"Analizar y generar comentario":"Generar comentario con IA");
+    html+='<i class="ti ti-sparkles"></i> '+(hasImg||hasPdf?"Analizar y generar comentario":"Generar comentario con IA");
     html+='</button>';
     html+='<div class="sbox" id="sbox-'+ky+'"></div>';
     html+='<div class="clbl"><i class="ti ti-message" style="font-size:12px"></i> Comentario para checklist eTiza</div>';
     html+='<textarea class="carea" id="txt-'+ky+'" onchange="saveC(\''+ky+'\',this.value)">'+(rv2.comentario||"")+'</textarea>';
     html+='</div></div>';
-  }
   html+='</div><div class="pacts">';
   html+='<button class="bsec" onclick="exportarExcel()"><i class="ti ti-download"></i> Exportar Excel</button>';
   html+='<button class="bpri" onclick="guardar('+mi+','+sem+')"><i class="ti ti-device-floppy"></i> Guardar semana</button>';
@@ -1219,11 +1279,30 @@ function loadImg(ky,input){
   };reader.readAsDataURL(file);
 }
 function clearImg(ky){delete ST.imgs[ky];renderContent();}
+function loadFile(ky,input){
+  var file=input.files[0];if(!file)return;
+  if(file.type==="application/pdf"){
+    var reader=new FileReader();
+    reader.onload=function(e){
+      var b64=e.target.result;
+      var kb=Math.round(file.size/1024);
+      ST.pdfs[ky]={name:file.name,b64:b64,size:kb+"KB"};
+      delete ST.imgs[ky];
+      savePdfs();renderContent();toast("PDF cargado: "+file.name);
+    };reader.readAsDataURL(file);
+  }else{
+    loadImg(ky,input);
+    if(ST.pdfs[ky]){delete ST.pdfs[ky];savePdfs();}
+  }
+}
+function clearPdf(ky){delete ST.pdfs[ky];savePdfs();renderContent();}
+function saveLink(ky,val){if(val&&val.trim()){ST.links[ky]=val.trim();}else{delete ST.links[ky];}saveLinks();}
 function setEst(ky,est){if(!ST.rev[ky])ST.rev[ky]={};ST.rev[ky].estado=ST.rev[ky].estado===est?null:est;saveRev();renderContent();}
 function saveC(ky,val){if(!ST.rev[ky])ST.rev[ky]={};ST.rev[ky].comentario=val;saveRev();}
 function guardar(mi,sem){var tas=document.querySelectorAll("[id^='txt-']");for(var i=0;i<tas.length;i++){var ky=tas[i].id.replace("txt-","");saveC(ky,tas[i].value);}saveRev();toast("Semana guardada");renderContent();}
 function setSbox(ky,type,msg){var el=document.getElementById("sbox-"+ky);if(!el)return;if(!type){el.className="sbox";el.innerHTML="";return;}el.className="sbox show "+type;el.innerHTML=msg;}
 
+async function generarUno(btn){
 async function generarUno(btn){
   var ky=btn.getAttribute("data-ky");var ri=parseInt(btn.getAttribute("data-ri"));var mi=parseInt(btn.getAttribute("data-mi"));var sem=parseInt(btn.getAttribute("data-sem"));
   btn.disabled=true;
@@ -1234,10 +1313,19 @@ async function generarUno(btn){
   var tm=tipoModulo(modNombre);
   var semLabel=esS0?"Semana 0 (Bienvenida)":"Semana "+sem;
   var moodleCtx=buildMoodleContext(ky,r.tipo,mkMoodle(ky));
-  var contexto="Recurso: "+r.name+" ("+r.tipo+")\nMódulo: "+modNombre+(esS0?" [Semana de Bienvenida]":" [Tipo: Módulo "+tm.label+"]")+"\nCarrera: "+(carObj?carObj.name:"")+", Ciclo "+ST.cic+", "+semLabel+moodleCtx;
-  var hasImg=!!(ST.imgs[ky]);var refImgs=buildRefImgs(r.tipo);var hasRefs=refImgs.length>0;
+  var linkCtx=ST.links[ky]?"\nURL del recurso: "+ST.links[ky]:"";
+  var contexto="Recurso: "+r.name+" ("+r.tipo+")\nM\u00f3dulo: "+modNombre+(esS0?" [Semana de Bienvenida]":" [Tipo: M\u00f3dulo "+tm.label+"]")+"\nCarrera: "+(carObj?carObj.name:"")+", Ciclo "+ST.cic+", "+semLabel+moodleCtx+linkCtx;
+  var hasImg=!!(ST.imgs[ky]);var hasPdf=!!(ST.pdfs[ky]);var refImgs=buildRefImgs(r.tipo);var hasRefs=refImgs.length>0;
   var system=buildSystem(r.tipo);var messages;
-  if(hasRefs&&hasImg){
+  if(hasPdf){
+    setSbox(ky,"wk",'<span class="spin"><i class="ti ti-loader"></i></span> Analizando PDF...');
+    var pdfData=ST.pdfs[ky].b64.split(",")[1];
+    var content=[];
+    if(hasRefs){content=refImgs.slice();content.push({type:"text",text:"--- DOCUMENTO PDF A REVISAR ---"});}
+    content.push({type:"document",source:{type:"base64",media_type:"application/pdf",data:pdfData}});
+    content.push({type:"text",text:(hasRefs?"Compara este documento PDF con las referencias y el kit de marca. ":"Analiza este documento PDF y ")+"Genera el comentario QA.\n"+contexto});
+    messages=[{role:"user",content:content}];
+  }else if(hasRefs&&hasImg){
     setSbox(ky,"wk",'<span class="spin"><i class="ti ti-loader"></i></span> Analizando con referencias y kit de marca...');
     var b64=ST.imgs[ky].split(",")[1];var mime=ST.imgs[ky].indexOf("image/png")>=0?"image/png":"image/jpeg";
     var content=refImgs.slice();content.push({type:"text",text:"--- RECURSO A REVISAR ---"});
@@ -1250,11 +1338,11 @@ async function generarUno(btn){
     messages=[{role:"user",content:[{type:"image",source:{type:"base64",media_type:mime2,data:b642}},{type:"text",text:"Analiza visualmente y genera el comentario QA.\n"+contexto}]}];
   }else if(hasRefs){
     setSbox(ky,"wk",'<span class="spin"><i class="ti ti-loader"></i></span> Generando con referencias...');
-    var content2=refImgs.slice();content2.push({type:"text",text:"Usando estas referencias como estándar, genera el comentario QA para:\n"+contexto});
+    var content2=refImgs.slice();content2.push({type:"text",text:"Usando estas referencias como est\u00e1ndar, genera el comentario QA para:\n"+contexto});
     messages=[{role:"user",content:content2}];
   }else{
     setSbox(ky,"wk",'<span class="spin"><i class="ti ti-loader"></i></span> Generando comentario...');
-    messages=[{role:"user",content:contexto+"\nGenera el comentario de revisión QA."}];
+    messages=[{role:"user",content:contexto+"\nGenera el comentario de revisi\u00f3n QA."}];
   }
   try{
     var texto=await claudeCall(system,messages);
@@ -1266,7 +1354,6 @@ async function generarUno(btn){
   }catch(err){setSbox(ky,"bd","<i class='ti ti-alert-circle'></i> Error: "+err.message);}
   btn.disabled=false;renderContent();
 }
-
 var genAllRunning=false;
 async function generarTodos(mi,sem){
   if(genAllRunning)return;genAllRunning=true;
@@ -1424,7 +1511,7 @@ window.testYEntrar=async function(){
 window.setTab=setTab;window.selCar=selCar;window.selCiclo=selCiclo;
 window.toggleMod=toggleMod;window.selSem=selSem;window.toggleRec=toggleRec;
 window.setEst=setEst;window.saveC=saveC;window.guardar=guardar;
-window.loadImg=loadImg;window.clearImg=clearImg;
+window.loadImg=loadImg;window.clearImg=clearImg;window.loadFile=loadFile;window.clearPdf=clearPdf;window.saveLink=saveLink;
 window.generarUno=generarUno;window.generarTodos=generarTodos;
 window.exportarExcel=exportarExcel;window.exportarCSV=exportarCSV;window.toast=toast;
 window.addRef=addRef;window.delRef=delRef;window.saveRefDesc=saveRefDesc;
